@@ -31,7 +31,5 @@ package alu_pkg;
   localparam OP_B_IMM_I   = 3'b010;
   localparam OP_B_IMM_U   = 3'b011;
   localparam OP_B_IMM_S   = 3'b100;
-  localparam OP_B_IMM_B   = 3'b101;
-  localparam OP_B_IMM_J   = 3'b110;
 
 endpackage
