@@ -36,6 +36,7 @@ module lsu(
   assign mem_req_o       = ( lsu_req_i ) && ( state_lsu == LSU_MEM_S ) &&
                            ( lsu_size_i inside { MEM_BYTE, MEM_HALF, MEM_WORD, MEM_BYTE_U, MEM_HALF_U } );
   assign mem_we_o        = ( lsu_we_i   );
+  assign mem_addr_o      = { lsu_addr_i[31:2], 2'b00 };
 
   assign lsu_stall_req_o = ( state_lsu == LSU_MEM_S );
 
@@ -45,17 +46,6 @@ module lsu(
       MEM_HALF: mem_be_o = ( lsu_addr_i[1] == 1'd1 ) ? ( 4'b1100 ) : ( 4'b0011 );
       MEM_BYTE: mem_be_o = 4'b0001 << lsu_addr_i[1:0];
       default:  mem_be_o = 4'b0000;
-    endcase
-  end
-
-  always_comb begin
-    case( lsu_size_i )
-      MEM_WORD:   mem_addr_o = { lsu_addr_i[31:2], 2'b00 };
-      MEM_HALF,
-      MEM_HALF_U: mem_addr_o = { lsu_addr_i[31:1], 1'b0  };
-      MEM_BYTE,
-      MEM_BYTE_U: mem_addr_o = lsu_addr_i;
-      default:    mem_addr_o = 32'd0;
     endcase
   end
 

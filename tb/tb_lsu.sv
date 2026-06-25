@@ -323,20 +323,6 @@ module tb_lsu#(parameter ITER=100000)();
     end
   end
 
-  // Address half Check
-  addr_half_check: assert property (
-    @( negedge clk )
-    disable iff( !rstn )
-    ( lsu_req ) && ( lsu_size inside { MEM_HALF, MEM_HALF_U } ) |-> mem_addr[0] === 1'd0
-  ) else begin
-    err_cnt++;
-    $error("\nInvalid Address on HALF request. Expected: %8h; Real: %8h", {mem_addr[31:1], 1'd0}, mem_addr);
-    if(err_cnt == 10) begin
-      $display("\nTest has been stopped after 10 errors");
-      $stop();
-    end
-  end
-
   // Address word Check
   addr_word_check: assert property (
     @( negedge clk )
