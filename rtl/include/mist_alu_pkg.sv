@@ -1,4 +1,4 @@
-package alu_pkg;
+package mist_alu_pkg;
 
   // Arithmetic operations
   localparam ALU_ADD      = 4'b0000;

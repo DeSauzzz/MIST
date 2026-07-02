@@ -1,6 +1,6 @@
-import alu_pkg::*;
+import mist_alu_pkg::*;
 
-module alu(
+module mist_alu(
   input  logic [31:0] a_op_i,
   input  logic [31:0] b_op_i,
   input  logic [3:0]  alu_op_i,

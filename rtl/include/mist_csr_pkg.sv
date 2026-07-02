@@ -1,4 +1,4 @@
-package csr_pkg;
+package mist_csr_pkg;
 
   localparam CSR_RW      = 3'b000; // Read/Write CSR
   localparam CSR_RS      = 3'b001; // Set CSR

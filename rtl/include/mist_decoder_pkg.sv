@@ -1,4 +1,4 @@
-package decoder_pkg;
+package mist_decoder_pkg;
 
     // Opcodes
     localparam OP_OPCODE      = 5'b01100;

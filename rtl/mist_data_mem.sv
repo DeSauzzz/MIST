@@ -1,7 +1,7 @@
-import mem_pkg::DATA_MEM_BYTE_SIZE;
-import mem_pkg::DATA_MEM_WORD_SIZE;
+import mist_mem_pkg::DATA_MEM_BYTE_SIZE;
+import mist_mem_pkg::DATA_MEM_WORD_SIZE;
 
-module data_mem(
+module mist_data_mem(
   input  logic clk_i,
   input  logic rstn_i,
 

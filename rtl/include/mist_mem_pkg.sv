@@ -1,4 +1,4 @@
-package mem_pkg;
+package mist_mem_pkg;
 
   localparam INSTR_MEM_BYTE_SIZE = 512;
   localparam INSTR_MEM_WORD_SIZE = INSTR_MEM_BYTE_SIZE / 4;

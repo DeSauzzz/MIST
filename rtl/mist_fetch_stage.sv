@@ -51,7 +51,7 @@ module mist_fetch_stage #(
     end
   end
 
-  instr_mem #(
+  mist_instr_mem #(
     .INIT_IMEM(INIT_IMEM)
   ) f_imem (
     .read_addr_i ( pc_cur    ),

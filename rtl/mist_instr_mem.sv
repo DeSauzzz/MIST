@@ -1,7 +1,7 @@
-import mem_pkg::INSTR_MEM_WORD_SIZE;
-import mem_pkg::INSTR_MEM_BYTE_SIZE;
+import mist_mem_pkg::INSTR_MEM_WORD_SIZE;
+import mist_mem_pkg::INSTR_MEM_BYTE_SIZE;
 
-module instr_mem#(
+module mist_instr_mem#(
   parameter INIT_IMEM = ""
 )(
   input  logic [31:0] read_addr_i,

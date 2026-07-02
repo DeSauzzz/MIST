@@ -1,4 +1,4 @@
-module reg_file(
+module mist_gpr(
   input  logic        clk_i,
   input  logic        wr_en_i,
 

@@ -1,8 +1,8 @@
-import decoder_pkg::*;
-import alu_pkg::*;
-import csr_pkg::*;
+import mist_decoder_pkg::*;
+import mist_alu_pkg::*;
+import mist_csr_pkg::*;
 
-module decoder(
+module mist_decoder(
   input  logic [31:0] instr_i,
 
   output logic        ill_instr_o,

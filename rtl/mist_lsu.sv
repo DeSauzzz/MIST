@@ -1,6 +1,6 @@
-import mem_pkg::*;
+import mist_mem_pkg::*;
 
-module lsu(
+module mist_lsu(
   input  logic        clk_i,
   input  logic        rstn_i,
 
