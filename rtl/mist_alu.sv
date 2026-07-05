@@ -1,8 +1,8 @@
 import mist_alu_pkg::*;
 
 module mist_alu(
-  input  logic [31:0] a_op_i,
-  input  logic [31:0] b_op_i,
+  input  logic [31:0] op_a_i,
+  input  logic [31:0] op_b_i,
   input  logic [3:0]  alu_op_i,
 
   output logic        flag_o,
@@ -18,16 +18,16 @@ module mist_alu(
   always_comb begin
     if( arith_op ) begin
       case( alu_op_i )
-        ALU_ADD:  result_o = a_op_i +    b_op_i;
-        ALU_SUB:  result_o = a_op_i -    b_op_i;
-        ALU_XOR:  result_o = a_op_i ^    b_op_i;
-        ALU_OR:   result_o = a_op_i |    b_op_i;
-        ALU_AND:  result_o = a_op_i &    b_op_i;
-        ALU_SLL:  result_o = a_op_i <<   b_op_i[4:0];
-        ALU_SRL:  result_o = a_op_i >>   b_op_i[4:0];
-        ALU_SRA:  result_o = a_op_i >>>  b_op_i[4:0];
-        ALU_SLT:  result_o = ( $signed(a_op_i) < $signed(b_op_i) ) ? ( 1'd1 ) : ( 1'd0 );
-        ALU_SLTU: result_o = ( a_op_i < b_op_i                   ) ? ( 1'd1 ) : ( 1'd0 );
+        ALU_ADD:  result_o = op_a_i +    op_b_i;
+        ALU_SUB:  result_o = op_a_i -    op_b_i;
+        ALU_XOR:  result_o = op_a_i ^    op_b_i;
+        ALU_OR:   result_o = op_a_i |    op_b_i;
+        ALU_AND:  result_o = op_a_i &    op_b_i;
+        ALU_SLL:  result_o = op_a_i <<   op_b_i[4:0];
+        ALU_SRL:  result_o = op_a_i >>   op_b_i[4:0];
+        ALU_SRA:  result_o = op_a_i >>>  op_b_i[4:0];
+        ALU_SLT:  result_o = ( $signed(op_a_i) < $signed(op_b_i) ) ? ( 1'd1 ) : ( 1'd0 );
+        ALU_SLTU: result_o = ( op_a_i < op_b_i                   ) ? ( 1'd1 ) : ( 1'd0 );
         default:  result_o = 32'd0;
       endcase
     end
@@ -38,12 +38,12 @@ module mist_alu(
   always_comb begin
     if( cmp_op ) begin
       case( alu_op_i )
-        ALU_EQ:  flag_o = ( a_op_i == b_op_i ) ? ( 1'd1 ) : ( 1'd0 );
-        ALU_NE:  flag_o = ( a_op_i != b_op_i ) ? ( 1'd1 ) : ( 1'd0 );
-        ALU_LT:  flag_o = ( a_op_i <  b_op_i ) ? ( 1'd1 ) : ( 1'd0 );
-        ALU_GE:  flag_o = ( a_op_i >  b_op_i ) ? ( 1'd1 ) : ( 1'd0 );
-        ALU_LTU: flag_o = ( a_op_i <= b_op_i ) ? ( 1'd1 ) : ( 1'd0 );
-        ALU_GEU: flag_o = ( a_op_i >= b_op_i ) ? ( 1'd1 ) : ( 1'd0 );
+        ALU_EQ:  flag_o = ( op_a_i == op_b_i ) ? ( 1'd1 ) : ( 1'd0 );
+        ALU_NE:  flag_o = ( op_a_i != op_b_i ) ? ( 1'd1 ) : ( 1'd0 );
+        ALU_LT:  flag_o = ( op_a_i <  op_b_i ) ? ( 1'd1 ) : ( 1'd0 );
+        ALU_GE:  flag_o = ( op_a_i >  op_b_i ) ? ( 1'd1 ) : ( 1'd0 );
+        ALU_LTU: flag_o = ( op_a_i <= op_b_i ) ? ( 1'd1 ) : ( 1'd0 );
+        ALU_GEU: flag_o = ( op_a_i >= op_b_i ) ? ( 1'd1 ) : ( 1'd0 );
         default: flag_o = 1'd0;
       endcase
     end

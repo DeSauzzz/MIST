@@ -29,6 +29,11 @@ module mist_decode_stage(
   output logic [31:0] imm_b_d_o,
   output logic [31:0] imm_j_d_o,
 
+  output logic [31:0] op_a_d_o,
+  output logic [31:0] op_b_d_o,
+
+  output logic [4:0]  gpr_wa_d_o,
+
   output logic        ill_instr_d_o,
 
   output logic [2:0]  csr_op_d_o,
@@ -47,9 +52,6 @@ module mist_decode_stage(
   output logic        gpr_we_d_o,
   output logic        mret_d_o,
   output logic [1:0]  wb_sel_d_o,
-
-  output logic [31:0] op_a_d_o,
-  output logic [31:0] op_b_d_o,
 
   output logic [31:0] pc_cur_d_o
 );
@@ -202,6 +204,7 @@ module mist_decode_stage(
     if( !rstn_i ) begin
       imm_b_d_o     <= 32'd0;
       imm_j_d_o     <= 32'd0;
+      gpr_wa_d_o    <= 5'd0;
       ill_instr_d_o <= 1'd0;
       csr_op_d_o    <= 3'd0;
       csr_we_d_o    <= 1'd0;
@@ -222,6 +225,7 @@ module mist_decode_stage(
     else if( flush_d_i ) begin
       imm_b_d_o     <= 32'd0;
       imm_j_d_o     <= 32'd0;
+      gpr_wa_d_o    <= 5'd0;
       ill_instr_d_o <= 1'd0;
       csr_op_d_o    <= 3'd0;
       csr_we_d_o    <= 1'd0;
@@ -242,6 +246,7 @@ module mist_decode_stage(
     else if( !stall_d_i ) begin
       imm_b_d_o     <= imm_b;
       imm_j_d_o     <= imm_j;
+      gpr_wa_d_o    <= gpr_wr_addr;
       ill_instr_d_o <= ill_instr;
       csr_op_d_o    <= csr_op;
       csr_we_d_o    <= csr_we;
