@@ -1,0 +1,160 @@
+module mist_execute_stage(
+  input  logic        clk_i,
+  input  logic        rstn_i,
+
+  // From decode stage
+  input  logic [31:0] imm_b_d_i,
+  input  logic [31:0] imm_j_d_i,
+
+  input  logic [31:0] op_a_d_i,
+  input  logic [31:0] op_b_d_i,
+
+  input  logic [4:0]  gpr_wa_d_i,
+
+  input  logic        ill_instr_d_i,
+
+  input  logic [2:0]  csr_op_d_i,
+  input  logic        csr_we_d_i,
+
+  input  logic        branch_d_i,
+  input  logic        jalr_d_i,
+  input  logic        jal_d_i,
+
+  input  logic        mem_req_d_i,
+  input  logic        mem_we_d_i,
+  input  logic [2:0]  mem_size_d_i,
+
+  input  logic [3:0]  alu_op_d_i,
+
+  input  logic        gpr_we_d_i,
+  input  logic        mret_d_i,
+  input  logic [1:0]  wb_sel_d_i,
+
+  input  logic [31:0] pc_cur_d_i,
+
+  // From Hazard unit
+  input  logic        stall_e_i,
+  input  logic        flush_e_i,
+
+  input  logic        raw_op_a_e_i,
+  input  logic        raw_op_b_e_i,
+
+  input  logic [31:0] frw_op_a_i,
+  input  logic [31:0] frw_op_b_i,
+
+  // To memory stage
+  output logic [31:0] alu_result_e_o,
+  output logic        alu_flag_e_o,
+
+  output logic [31:0] wr_mem_data_o,
+
+  output logic [31:0] offset_pc_e_o,
+
+  output logic [4:0]  gpr_wa_e_o,
+
+  output logic        ill_instr_e_o,
+
+  output logic [2:0]  csr_op_e_o,
+  output logic        csr_we_e_o,
+
+  output logic        branch_e_o,
+  output logic        jalr_e_o,
+  output logic        jal_e_o,
+
+  output logic        mem_req_e_o,
+  output logic        mem_we_e_o,
+  output logic [2:0]  mem_size_e_o,
+
+  output logic        gpr_we_e_o,
+  output logic        mret_e_o,
+  output logic [1:0]  wb_sel_e_o
+);
+
+  // ALU logic
+  logic [31:0] op_a;
+  logic [31:0] op_b;
+
+  logic [31:0] alu_result;
+  logic        alu_flag;
+
+  assign op_a = ( raw_op_a_e_i ) ? ( frw_op_a_i ) : ( op_a_d_i );
+  assign op_b = ( raw_op_b_e_i ) ? ( frw_op_b_i ) : ( op_b_d_i );
+
+  mist_alu e_alu(
+    .op_a_i   ( op_a       ),
+    .op_b_i   ( op_b       ),
+    .alu_op_i ( alu_op_d_i ),
+
+    .flag_o   ( alu_flag   ),
+    .result_o ( alu_result )
+  );
+
+  // Offset's logic
+  logic [31:0] offset_pc;
+
+  assign offset_pc = ( branch_d_i ) ? ( pc_cur_d_i + imm_b_d_i ):
+                     ( jal_d_i    ) ? ( pc_cur_d_i + imm_j_d_i ):
+                                      ( pc_cur_d_i + 32'd0     );
+
+  // To memory stage
+  always_ff @( posedge clk_i ) begin
+    if( !rstn_i ) begin
+      alu_result_e_o <= 32'd0;
+      alu_flag_e_o   <= 1'd0;
+      wr_mem_data_o  <= 32'd0;
+      offset_pc_e_o  <= 32'd0;
+      gpr_wa_e_o     <= 5'd0;
+      ill_instr_e_o  <= 1'd0;
+      csr_op_e_o     <= 3'd0;
+      csr_we_e_o     <= 1'd0;
+      branch_e_o     <= 1'd0;
+      jalr_e_o       <= 1'd0;
+      jal_e_o        <= 1'd0;
+      mem_req_e_o    <= 1'd0;
+      mem_we_e_o     <= 1'd0;
+      mem_size_e_o   <= 3'd0;
+      gpr_we_e_o     <= 1'd0;
+      mret_e_o       <= 1'd0;
+      wb_sel_e_o     <= 2'd0;
+    end
+    else if( flush_e_i ) begin
+      alu_result_e_o <= 32'd0;
+      alu_flag_e_o   <= 1'd0;
+      wr_mem_data_o  <= 32'd0;
+      offset_pc_e_o  <= 32'd0;
+      gpr_wa_e_o     <= 5'd0;
+      ill_instr_e_o  <= 1'd0;
+      csr_op_e_o     <= 3'd0;
+      csr_we_e_o     <= 1'd0;
+      branch_e_o     <= 1'd0;
+      jalr_e_o       <= 1'd0;
+      jal_e_o        <= 1'd0;
+      mem_req_e_o    <= 1'd0;
+      mem_we_e_o     <= 1'd0;
+      mem_size_e_o   <= 3'd0;
+      gpr_we_e_o     <= 1'd0;
+      mret_e_o       <= 1'd0;
+      wb_sel_e_o     <= 2'd0;
+    end
+    else if( !stall_e_i ) begin
+      alu_result_e_o <= alu_result;
+      alu_flag_e_o   <= alu_flag;
+      wr_mem_data_o  <= op_b_d_i;
+      offset_pc_e_o  <= offset_pc;
+      gpr_wa_e_o     <= gpr_wa_d_i;
+      ill_instr_e_o  <= ill_instr_d_i;
+      csr_op_e_o     <= csr_op_d_i;
+      csr_we_e_o     <= csr_we_d_i;
+      branch_e_o     <= branch_d_i;
+      jalr_e_o       <= jalr_d_i;
+      jal_e_o        <= jal_d_i;
+      mem_req_e_o    <= mem_req_d_i;
+      mem_we_e_o     <= mem_we_d_i;
+      mem_size_e_o   <= mem_size_d_i;
+      gpr_we_e_o     <= gpr_we_d_i;
+      mret_e_o       <= mret_d_i;
+      wb_sel_e_o     <= wb_sel_d_i;
+    end
+  end
+
+endmodule
