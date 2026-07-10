@@ -22,8 +22,8 @@ module mist_decode_stage(
   input  logic        gpr_we_wb_i,
 
   // From Hazard Unit
-  input  logic        stall_d_i,
-  input  logic        flush_d_i,
+  input  logic        hu_stall_d_i,
+  input  logic        hu_flush_d_i,
 
   // To execute stage
   output logic [31:0] imm_b_d_o,
@@ -33,6 +33,7 @@ module mist_decode_stage(
   output logic [31:0] op_b_d_o,
 
   output logic [4:0]  gpr_wa_d_o,
+  output logic        gpr_we_d_o,
 
   output logic        ill_instr_d_o,
 
@@ -49,7 +50,6 @@ module mist_decode_stage(
 
   output logic [3:0]  alu_op_d_o,
 
-  output logic        gpr_we_d_o,
   output logic        mret_d_o,
   output logic [1:0]  wb_sel_d_o,
 
@@ -222,7 +222,7 @@ module mist_decode_stage(
       op_b_d_o      <= 32'd0;
       pc_cur_d_o    <= 32'd0;
     end
-    else if( flush_d_i ) begin
+    else if( hu_flush_d_i ) begin
       imm_b_d_o     <= 32'd0;
       imm_j_d_o     <= 32'd0;
       gpr_wa_d_o    <= 5'd0;
@@ -243,7 +243,7 @@ module mist_decode_stage(
       op_b_d_o      <= 32'd0;
       pc_cur_d_o    <= 32'd0;
     end
-    else if( !stall_d_i ) begin
+    else if( !hu_stall_d_i ) begin
       imm_b_d_o     <= imm_b;
       imm_j_d_o     <= imm_j;
       gpr_wa_d_o    <= gpr_wr_addr;

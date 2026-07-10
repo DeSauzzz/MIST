@@ -10,6 +10,7 @@ module mist_execute_stage(
   input  logic [31:0] op_b_d_i,
 
   input  logic [4:0]  gpr_wa_d_i,
+  input  logic        gpr_we_d_i,
 
   input  logic        ill_instr_d_i,
 
@@ -26,31 +27,29 @@ module mist_execute_stage(
 
   input  logic [3:0]  alu_op_d_i,
 
-  input  logic        gpr_we_d_i,
   input  logic        mret_d_i,
   input  logic [1:0]  wb_sel_d_i,
 
   input  logic [31:0] pc_cur_d_i,
 
   // From Hazard unit
-  input  logic        stall_e_i,
-  input  logic        flush_e_i,
+  input  logic        hu_stall_e_i,
+  input  logic        hu_flush_e_i,
 
-  input  logic        raw_op_a_e_i,
-  input  logic        raw_op_b_e_i,
+  input  logic        hu_raw_op_a_e_i,
+  input  logic        hu_raw_op_b_e_i,
 
-  input  logic [31:0] frw_op_a_i,
-  input  logic [31:0] frw_op_b_i,
+  input  logic [31:0] hu_frw_op_a_i,
+  input  logic [31:0] hu_frw_op_b_i,
 
   // To memory stage
   output logic [31:0] alu_result_e_o,
   output logic        alu_flag_e_o,
 
-  output logic [31:0] wr_mem_data_o,
-
   output logic [31:0] offset_pc_e_o,
 
   output logic [4:0]  gpr_wa_e_o,
+  output logic        gpr_we_e_o,
 
   output logic        ill_instr_e_o,
 
@@ -64,8 +63,8 @@ module mist_execute_stage(
   output logic        mem_req_e_o,
   output logic        mem_we_e_o,
   output logic [2:0]  mem_size_e_o,
+  output logic [31:0] mem_wd_e_o,
 
-  output logic        gpr_we_e_o,
   output logic        mret_e_o,
   output logic [1:0]  wb_sel_e_o
 );
@@ -77,8 +76,8 @@ module mist_execute_stage(
   logic [31:0] alu_result;
   logic        alu_flag;
 
-  assign op_a = ( raw_op_a_e_i ) ? ( frw_op_a_i ) : ( op_a_d_i );
-  assign op_b = ( raw_op_b_e_i ) ? ( frw_op_b_i ) : ( op_b_d_i );
+  assign op_a = ( hu_raw_op_a_e_i ) ? ( hu_frw_op_a_i ) : ( op_a_d_i );
+  assign op_b = ( hu_raw_op_b_e_i ) ? ( hu_frw_op_b_i ) : ( op_b_d_i );
 
   mist_alu e_alu(
     .op_a_i   ( op_a       ),
@@ -101,7 +100,6 @@ module mist_execute_stage(
     if( !rstn_i ) begin
       alu_result_e_o <= 32'd0;
       alu_flag_e_o   <= 1'd0;
-      wr_mem_data_o  <= 32'd0;
       offset_pc_e_o  <= 32'd0;
       gpr_wa_e_o     <= 5'd0;
       ill_instr_e_o  <= 1'd0;
@@ -113,14 +111,14 @@ module mist_execute_stage(
       mem_req_e_o    <= 1'd0;
       mem_we_e_o     <= 1'd0;
       mem_size_e_o   <= 3'd0;
+      mem_wd_e_o     <= 32'd0;
       gpr_we_e_o     <= 1'd0;
       mret_e_o       <= 1'd0;
       wb_sel_e_o     <= 2'd0;
     end
-    else if( flush_e_i ) begin
+    else if( hu_flush_e_i ) begin
       alu_result_e_o <= 32'd0;
       alu_flag_e_o   <= 1'd0;
-      wr_mem_data_o  <= 32'd0;
       offset_pc_e_o  <= 32'd0;
       gpr_wa_e_o     <= 5'd0;
       ill_instr_e_o  <= 1'd0;
@@ -132,14 +130,14 @@ module mist_execute_stage(
       mem_req_e_o    <= 1'd0;
       mem_we_e_o     <= 1'd0;
       mem_size_e_o   <= 3'd0;
+      mem_wd_e_o     <= 32'd0;
       gpr_we_e_o     <= 1'd0;
       mret_e_o       <= 1'd0;
       wb_sel_e_o     <= 2'd0;
     end
-    else if( !stall_e_i ) begin
+    else if( !hu_stall_e_i ) begin
       alu_result_e_o <= alu_result;
       alu_flag_e_o   <= alu_flag;
-      wr_mem_data_o  <= op_b_d_i;
       offset_pc_e_o  <= offset_pc;
       gpr_wa_e_o     <= gpr_wa_d_i;
       ill_instr_e_o  <= ill_instr_d_i;
@@ -151,6 +149,7 @@ module mist_execute_stage(
       mem_req_e_o    <= mem_req_d_i;
       mem_we_e_o     <= mem_we_d_i;
       mem_size_e_o   <= mem_size_d_i;
+      mem_wd_e_o     <= op_b_d_i;
       gpr_we_e_o     <= gpr_we_d_i;
       mret_e_o       <= mret_d_i;
       wb_sel_e_o     <= wb_sel_d_i;
