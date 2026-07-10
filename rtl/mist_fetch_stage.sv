@@ -11,13 +11,12 @@ module mist_fetch_stage #(
   input  logic [31:0] offset_alu_wb_i,
 
   // From Hazard Unit
-  input  logic        stall_f_i,
-  input  logic        flush_f_i,
+  input  logic        hu_stall_f_i,
+  input  logic        hu_flush_f_i,
 
   // To Decode Stage
   output logic [31:0] instr_f_o,
   output logic [31:0] pc_cur_f_o
-  //output logic [31:0] pc_new_f_o TODO: Is it useless?
 );
 
   logic [31:0] instr_cur;
@@ -41,11 +40,11 @@ module mist_fetch_stage #(
       instr_f_o  <= 32'd0;
       pc_cur_f_o <= 32'd0;
     end
-    else if( flush_f_i ) begin
+    else if( hu_flush_f_i ) begin
       instr_f_o  <= 32'd0;
       pc_cur_f_o <= 32'd0;
     end
-    else if( !stall_f_i ) begin
+    else if( !hu_stall_f_i ) begin
       instr_f_o  <= instr_cur;
       pc_cur_f_o <= pc_cur;
     end

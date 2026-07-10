@@ -14,9 +14,9 @@ module mist_decoder(
   output logic        jalr_o,
   output logic        jal_o,
 
-  output logic        mem_req_o,
-  output logic        mem_we_o,
-  output logic [2:0]  mem_size_o,
+  output logic        lsu_req_o,
+  output logic        lsu_we_o,
+  output logic [2:0]  lsu_size_o,
 
   output logic [1:0]  alu_op_a_sel_o,
   output logic [2:0]  alu_op_b_sel_o,
@@ -96,9 +96,9 @@ module mist_decoder(
   assign jalr_o      = ( opcode == JALR_OPCODE   ) && !( ill_instr );
 
   // Memory logic
-  assign mem_req_o   = ( opcode inside { LOAD_OPCODE, STORE_OPCODE } ) && !( ill_instr );
-  assign mem_we_o    = ( opcode == STORE_OPCODE                      ) && !( ill_instr );
-  assign mem_size_o  = ( funct3 );
+  assign lsu_req_o   = ( opcode inside { LOAD_OPCODE, STORE_OPCODE } ) && !( ill_instr );
+  assign lsu_we_o    = ( opcode == STORE_OPCODE                      ) && !( ill_instr );
+  assign lsu_size_o  = ( funct3 );
 
   // ALU logic
   always_comb begin

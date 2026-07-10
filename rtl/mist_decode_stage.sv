@@ -44,9 +44,9 @@ module mist_decode_stage(
   output logic        jalr_d_o,
   output logic        jal_d_o,
 
-  output logic        mem_req_d_o,
-  output logic        mem_we_d_o,
-  output logic [2:0]  mem_size_d_o,
+  output logic        lsu_req_d_o,
+  output logic        lsu_we_d_o,
+  output logic [2:0]  lsu_size_d_o,
 
   output logic [3:0]  alu_op_d_o,
 
@@ -113,9 +113,9 @@ module mist_decode_stage(
   logic        jalr;
   logic        jal;
 
-  logic        mem_req;
-  logic        mem_we;
-  logic [2:0]  mem_size;
+  logic        lsu_req;
+  logic        lsu_we;
+  logic [2:0]  lsu_size;
 
   logic [1:0]  alu_op_a_sel;
   logic [2:0]  alu_op_b_sel;
@@ -137,9 +137,9 @@ module mist_decode_stage(
     .jalr_o         ( jalr         ),
     .jal_o          ( jal          ),
 
-    .mem_req_o      ( mem_req      ),
-    .mem_we_o       ( mem_we       ),
-    .mem_size_o     ( mem_size     ),
+    .lsu_req_o      ( lsu_req      ),
+    .lsu_we_o       ( lsu_we       ),
+    .lsu_size_o     ( lsu_size     ),
 
     .alu_op_a_sel_o ( alu_op_a_sel ),
     .alu_op_b_sel_o ( alu_op_b_sel ),
@@ -211,9 +211,9 @@ module mist_decode_stage(
       branch_d_o    <= 1'd0;
       jalr_d_o      <= 1'd0;
       jal_d_o       <= 1'd0;
-      mem_req_d_o   <= 1'd0;
-      mem_we_d_o    <= 1'd0;
-      mem_size_d_o  <= 3'd0;
+      lsu_req_d_o   <= 1'd0;
+      lsu_we_d_o    <= 1'd0;
+      lsu_size_d_o  <= 3'd0;
       alu_op_d_o    <= 4'd0;
       gpr_we_d_o    <= 1'd0;
       mret_d_o      <= 1'd0;
@@ -232,9 +232,9 @@ module mist_decode_stage(
       branch_d_o    <= 1'd0;
       jalr_d_o      <= 1'd0;
       jal_d_o       <= 1'd0;
-      mem_req_d_o   <= 1'd0;
-      mem_we_d_o    <= 1'd0;
-      mem_size_d_o  <= 3'd0;
+      lsu_req_d_o   <= 1'd0;
+      lsu_we_d_o    <= 1'd0;
+      lsu_size_d_o  <= 3'd0;
       alu_op_d_o    <= 4'd0;
       gpr_we_d_o    <= 1'd0;
       mret_d_o      <= 1'd0;
@@ -253,9 +253,9 @@ module mist_decode_stage(
       branch_d_o    <= branch;
       jalr_d_o      <= jalr;
       jal_d_o       <= jal;
-      mem_req_d_o   <= mem_req;
-      mem_we_d_o    <= mem_we;
-      mem_size_d_o  <= mem_size;
+      lsu_req_d_o   <= lsu_req;
+      lsu_we_d_o    <= lsu_we;
+      lsu_size_d_o  <= lsu_size;
       alu_op_d_o    <= alu_op;
       gpr_we_d_o    <= gpr_we;
       mret_d_o      <= mret;

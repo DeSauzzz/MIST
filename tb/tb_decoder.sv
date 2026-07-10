@@ -24,9 +24,9 @@ module tb_decoder#(parameter ITER=30000)();
   logic        jalr;
   logic        jal;
 
-  logic        mem_req;
-  logic        mem_we;
-  logic [2:0]  mem_size;
+  logic        lsu_req;
+  logic        lsu_we;
+  logic [2:0]  lsu_size;
 
   logic [1:0]  alu_op_a_sel;
   logic [2:0]  alu_op_b_sel;
@@ -49,9 +49,9 @@ module tb_decoder#(parameter ITER=30000)();
   logic        exp_jalr;
   logic        exp_jal;
 
-  logic        exp_mem_req;
-  logic        exp_mem_we;
-  logic [2:0]  exp_mem_size;
+  logic        exp_lsu_req;
+  logic        exp_lsu_we;
+  logic [2:0]  exp_lsu_size;
 
   logic [1:0]  exp_alu_op_a_sel;
   logic [2:0]  exp_alu_op_b_sel;
@@ -561,9 +561,9 @@ module tb_decoder#(parameter ITER=30000)();
     exp_branch       = 1'd0;
     exp_jalr         = 1'd0;
     exp_jal          = 1'd0;
-    exp_mem_req      = 1'd0;
-    exp_mem_we       = 1'd0;
-    exp_mem_size     = funct3;
+    exp_lsu_req      = 1'd0;
+    exp_lsu_we       = 1'd0;
+    exp_lsu_size     = funct3;
     exp_alu_op_a_sel = OP_A_CURR_PC;
     exp_alu_op_b_sel = OP_B_INCR;
     exp_alu_op       = ALU_ADD;
@@ -780,9 +780,9 @@ module tb_decoder#(parameter ITER=30000)();
             3'b000:
               begin
                 exp_ill_instr    = 1'd0;
-                exp_mem_req      = 1'd1;
+                exp_lsu_req      = 1'd1;
                 exp_gpr_we       = 1'd1;
-                exp_mem_size     = MEM_BYTE;
+                exp_lsu_size     = MEM_BYTE;
                 exp_alu_op       = ALU_ADD;
                 exp_alu_op_a_sel = OP_A_RS1;
                 exp_alu_op_b_sel = OP_B_IMM_I;
@@ -791,9 +791,9 @@ module tb_decoder#(parameter ITER=30000)();
             3'b001:
               begin
                 exp_ill_instr    = 1'd0;
-                exp_mem_req      = 1'd1;
+                exp_lsu_req      = 1'd1;
                 exp_gpr_we       = 1'd1;
-                exp_mem_size     = MEM_HALF;
+                exp_lsu_size     = MEM_HALF;
                 exp_alu_op       = ALU_ADD;
                 exp_alu_op_a_sel = OP_A_RS1;
                 exp_alu_op_b_sel = OP_B_IMM_I;
@@ -802,9 +802,9 @@ module tb_decoder#(parameter ITER=30000)();
             3'b010:
               begin
                 exp_ill_instr    = 1'd0;
-                exp_mem_req      = 1'd1;
+                exp_lsu_req      = 1'd1;
                 exp_gpr_we       = 1'd1;
-                exp_mem_size     = MEM_WORD;
+                exp_lsu_size     = MEM_WORD;
                 exp_alu_op       = ALU_ADD;
                 exp_alu_op_a_sel = OP_A_RS1;
                 exp_alu_op_b_sel = OP_B_IMM_I;
@@ -813,9 +813,9 @@ module tb_decoder#(parameter ITER=30000)();
             3'b100:
               begin
                 exp_ill_instr    = 1'd0;
-                exp_mem_req      = 1'd1;
+                exp_lsu_req      = 1'd1;
                 exp_gpr_we       = 1'd1;
-                exp_mem_size     = MEM_BYTE_U;
+                exp_lsu_size     = MEM_BYTE_U;
                 exp_alu_op       = ALU_ADD;
                 exp_alu_op_a_sel = OP_A_RS1;
                 exp_alu_op_b_sel = OP_B_IMM_I;
@@ -824,9 +824,9 @@ module tb_decoder#(parameter ITER=30000)();
             3'b101:
               begin
                 exp_ill_instr    = 1'd0;
-                exp_mem_req      = 1'd1;
+                exp_lsu_req      = 1'd1;
                 exp_gpr_we       = 1'd1;
-                exp_mem_size     = MEM_HALF_U;
+                exp_lsu_size     = MEM_HALF_U;
                 exp_alu_op       = ALU_ADD;
                 exp_alu_op_a_sel = OP_A_RS1;
                 exp_alu_op_b_sel = OP_B_IMM_I;
@@ -845,9 +845,9 @@ module tb_decoder#(parameter ITER=30000)();
                 exp_alu_op_a_sel = OP_A_RS1;
                 exp_alu_op_b_sel = OP_B_IMM_S;
                 exp_alu_op       = ALU_ADD;
-                exp_mem_req      = 1'd1;
-                exp_mem_we       = 1'd1;
-                exp_mem_size     = MEM_BYTE;
+                exp_lsu_req      = 1'd1;
+                exp_lsu_we       = 1'd1;
+                exp_lsu_size     = MEM_BYTE;
               end
             3'b001:
               begin
@@ -855,9 +855,9 @@ module tb_decoder#(parameter ITER=30000)();
                 exp_alu_op_a_sel = OP_A_RS1;
                 exp_alu_op_b_sel = OP_B_IMM_S;
                 exp_alu_op       = ALU_ADD;
-                exp_mem_req      = 1'd1;
-                exp_mem_we       = 1'd1;
-                exp_mem_size     = MEM_HALF;
+                exp_lsu_req      = 1'd1;
+                exp_lsu_we       = 1'd1;
+                exp_lsu_size     = MEM_HALF;
               end
             3'b010:
               begin
@@ -865,9 +865,9 @@ module tb_decoder#(parameter ITER=30000)();
                 exp_alu_op_a_sel = OP_A_RS1;
                 exp_alu_op_b_sel = OP_B_IMM_S;
                 exp_alu_op       = ALU_ADD;
-                exp_mem_req      = 1'd1;
-                exp_mem_we       = 1'd1;
-                exp_mem_size     = MEM_WORD;
+                exp_lsu_req      = 1'd1;
+                exp_lsu_we       = 1'd1;
+                exp_lsu_size     = MEM_WORD;
               end
             default:
                 exp_ill_instr    = 1'd1;
@@ -1040,9 +1040,9 @@ module tb_decoder#(parameter ITER=30000)();
           exp_branch       = 1'd0;
           exp_jalr         = 1'd0;
           exp_jal          = 1'd0;
-          exp_mem_req      = 1'd0;
-          exp_mem_we       = 1'd0;
-          exp_mem_size     = funct3;
+          exp_lsu_req      = 1'd0;
+          exp_lsu_we       = 1'd0;
+          exp_lsu_size     = funct3;
           exp_alu_op_a_sel = OP_A_CURR_PC;
           exp_alu_op_b_sel = OP_B_INCR;
           exp_alu_op       = ALU_ADD;
@@ -1147,45 +1147,45 @@ module tb_decoder#(parameter ITER=30000)();
     end
   end
 
-  mem_req_check: assert property (
+  lsu_req_check: assert property (
     @( negedge clk )
      disable iff( !rstn )
-     ( exp_mem_req === mem_req )
+     ( exp_lsu_req === lsu_req )
   )
   else begin
     err_cnt++;
-    $error("\nInvalid mem_req! Instructions = %32b; opcode = %7b; expected mem_req = %1b; real mem_req = %1b. Time: %t",
-            instr, opcode, exp_mem_req, mem_req, $time);
+    $error("\nInvalid lsu_req! Instructions = %32b; opcode = %7b; expected lsu_req = %1b; real lsu_req = %1b. Time: %t",
+            instr, opcode, exp_lsu_req, lsu_req, $time);
     if( err_cnt == 10 ) begin
       $display("\nTest has been stopped after 10 errors");
       $stop();
     end
   end
 
-  mem_we_check: assert property (
+  lsu_we_check: assert property (
     @( negedge clk )
      disable iff( !rstn )
-     ( exp_mem_we === mem_we )
+     ( exp_lsu_we === lsu_we )
   )
   else begin
     err_cnt++;
-    $error("\nInvalid mem_we! Instructions = %32b; opcode = %7b; expected mem_we = %1b; real mem_we = %1b. Time: %t",
-            instr, opcode, exp_mem_we, mem_we, $time);
+    $error("\nInvalid lsu_we! Instructions = %32b; opcode = %7b; expected lsu_we = %1b; real lsu_we = %1b. Time: %t",
+            instr, opcode, exp_lsu_we, lsu_we, $time);
     if( err_cnt == 10 ) begin
       $display("\nTest has been stopped after 10 errors");
       $stop();
     end
   end
 
-  mem_size_check: assert property (
+  lsu_size_check: assert property (
     @( negedge clk )
      disable iff( !rstn )
-     ( exp_mem_size === mem_size )
+     ( exp_lsu_size === lsu_size )
   )
   else begin
     err_cnt++;
-    $error("\nInvalid mem_size! Instructions = %32b; opcode = %7b; expected mem_size = %3b; real mem_size = %3b. Time: %t",
-            instr, opcode, exp_mem_size, mem_size, $time);
+    $error("\nInvalid lsu_size! Instructions = %32b; opcode = %7b; expected lsu_size = %3b; real lsu_size = %3b. Time: %t",
+            instr, opcode, exp_lsu_size, lsu_size, $time);
     if( err_cnt == 10 ) begin
       $display("\nTest has been stopped after 10 errors");
       $stop();
@@ -1298,9 +1298,9 @@ module tb_decoder#(parameter ITER=30000)();
     .jalr_o         ( jalr         ),
     .jal_o          ( jal          ),
 
-    .mem_req_o      ( mem_req      ),
-    .mem_we_o       ( mem_we       ),
-    .mem_size_o     ( mem_size     ),
+    .lsu_req_o      ( lsu_req      ),
+    .lsu_we_o       ( lsu_we       ),
+    .lsu_size_o     ( lsu_size     ),
 
     .alu_op_a_sel_o ( alu_op_a_sel ),
     .alu_op_b_sel_o ( alu_op_b_sel ),
