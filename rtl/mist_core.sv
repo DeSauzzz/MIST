@@ -26,7 +26,7 @@ module mist_core(
   logic        jalr       [d:w];
   logic        jal        [d:w];
 
-  logic        offset_pc  [e:w];
+  logic [31:0] offset_pc  [e:w];
 
   logic [31:0] imm_b      [d:d];
   logic [31:0] imm_j      [d:d];
@@ -41,7 +41,7 @@ module mist_core(
   logic [2:0]  csr_op     [d:e];
   logic        csr_we     [d:e];
 
-  logic [31:0] gpr_wd     [d:w];
+  logic [31:0] gpr_wd     [w:w];
   logic [4:0]  gpr_wa     [d:w];
   logic        gpr_we     [d:w];
 
@@ -59,7 +59,7 @@ module mist_core(
   logic [31:0] mem_rd     [m:m];
   logic        mem_ack    [m:m];
 
-  logic [1:0]  wb_sel     [e:w];
+  logic [1:0]  wb_sel     [d:w];
 
   /////////////////////
   // Writeback stage //
@@ -86,7 +86,7 @@ module mist_core(
 
   always_comb begin
     case( wb_sel[w] )
-      EXEC_WB_RESULT: gpr_wd[w] = gpr_wd[m];
+      EXEC_WB_RESULT: gpr_wd[w] = alu_result[w];
       LSU_WB_DATA:    gpr_wd[w] = lsu_rd[w];
       CSR_WB_DATA:    gpr_wd[w] = 32'd0;     // TODO: Fix when CSR appears
       default:        gpr_wd[w] = 32'd0;
@@ -97,7 +97,9 @@ module mist_core(
   // Module instances //
   //////////////////////
 
-  mist_fetch_stage fetch_stage(
+  mist_fetch_stage #(
+    .INIT_IMEM("program.mem")
+  ) fetch_stage (
     .clk_i            ( clk_i            ),
     .rstn_i           ( rstn_i           ),
 

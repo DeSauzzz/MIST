@@ -1,5 +1,5 @@
 module mist_fetch_stage #(
-  parameter INIT_IMEM = "program.mem"
+  parameter INIT_IMEM = ""
 )(
   input  logic        clk_i,
   input  logic        rstn_i,
