@@ -38,7 +38,7 @@ module mist_lsu(
   assign mem_we_o        = ( lsu_we_i   );
   assign mem_addr_o      = { lsu_addr_i[31:2], 2'b00 };
 
-  assign lsu_stall_req_o = ( state_lsu == LSU_MEM_S );
+  assign lsu_stall_req_o = ( lsu_req_i) && ( state_lsu != LSU_ACK_S );
 
   always_comb begin
     case( lsu_size_i )
