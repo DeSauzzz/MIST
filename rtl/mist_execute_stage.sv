@@ -36,11 +36,17 @@ module mist_execute_stage(
   input  logic        hu_stall_e_i,
   input  logic        hu_flush_e_i,
 
-  input  logic        hu_raw_op_a_e_i,
-  input  logic        hu_raw_op_b_e_i,
+  input  logic        hu_raw_solve_op_a_e_i,
+  input  logic        hu_raw_solve_op_b_e_i,
 
   input  logic [31:0] hu_frw_op_a_i,
   input  logic [31:0] hu_frw_op_b_i,
+
+  // To Hazard Unit
+  output logic        hu_flush_req_e_o,
+
+  output logic [4:0]  hu_rd_addr_e_o,
+  output logic [31:0] hu_frw_result_e_o,
 
   // To memory stage
   output logic [31:0] alu_result_e_o,
@@ -76,8 +82,8 @@ module mist_execute_stage(
   logic [31:0] alu_result;
   logic        alu_flag;
 
-  assign op_a = ( hu_raw_op_a_e_i ) ? ( hu_frw_op_a_i ) : ( op_a_d_i );
-  assign op_b = ( hu_raw_op_b_e_i ) ? ( hu_frw_op_b_i ) : ( op_b_d_i );
+  assign op_a = ( hu_raw_solve_op_a_e_i ) ? ( hu_frw_op_a_i ) : ( op_a_d_i );
+  assign op_b = ( hu_raw_solve_op_b_e_i ) ? ( hu_frw_op_b_i ) : ( op_b_d_i );
 
   mist_alu e_alu(
     .op_a_i   ( op_a       ),
@@ -94,6 +100,25 @@ module mist_execute_stage(
   assign offset_pc = ( branch_d_i ) ? ( pc_cur_d_i + imm_b_d_i ):
                      ( jal_d_i    ) ? ( pc_cur_d_i + imm_j_d_i ):
                                       ( pc_cur_d_i + 32'd0     );
+
+  // To Hazard Unit
+  assign hu_rd_addr_e_o    = gpr_wa_d_i;
+  assign hu_frw_result_e_o = alu_result;
+
+  logic hu_flush_req_ff;
+
+  always_ff @( posedge clk_i ) begin
+    if( !rstn_i )
+      hu_flush_req_ff <= 1'd0;
+    else if( ( hu_flush_req_ff ) && !( hu_stall_e_i ) )
+      hu_flush_req_ff <= 1'd0;
+    else if( ( jalr_d_i   ) || ( jal_d_i ) )
+      hu_flush_req_ff <= 1'd1;
+    else if( ( branch_d_i ) && ( alu_flag ) )
+      hu_flush_req_ff <= 1'd1;
+  end
+
+  assign hu_flush_req_e_o = hu_flush_req_ff;
 
   // To memory stage
   always_ff @( posedge clk_i ) begin
