@@ -38,6 +38,7 @@ module mist_core(
   logic        mret              [d:e];
 
   logic        ill_instr         [d:e];
+  logic [6:0]  opcode            [f:e];
   logic [31:0] instr             [f:f];
   logic [31:0] pc_cur            [f:d];
 
@@ -138,6 +139,7 @@ module mist_core(
 
     // To Decode Stage
     .instr_f_o             ( instr            [f] ),
+    .pd_opcode_f_o         ( opcode           [f] ),
     .pc_cur_f_o            ( pc_cur           [f] )
   );
 
@@ -147,6 +149,7 @@ module mist_core(
 
     // From fetch stage
     .instr_f_i             ( instr            [f] ),
+    .pd_opcode_f_i         ( opcode           [f] ),
     .pc_cur_f_i            ( pc_cur           [f] ),
 
     // From wb stage
@@ -179,6 +182,7 @@ module mist_core(
     .gpr_we_d_o            ( gpr_we           [d] ),
 
     .ill_instr_d_o         ( ill_instr        [d] ),
+    .pd_opcode_d_o         ( opcode           [d] ),
 
     .csr_op_d_o            ( csr_op           [d] ),
     .csr_we_d_o            ( csr_we           [d] ),
@@ -214,6 +218,7 @@ module mist_core(
     .gpr_we_d_i            ( gpr_we           [d] ),
 
     .ill_instr_d_i         ( ill_instr        [d] ),
+    .pd_opcode_d_i         ( opcode           [d] ),
 
     .csr_op_d_i            ( csr_op           [d] ),
     .csr_we_d_i            ( csr_we           [d] ),
@@ -259,6 +264,7 @@ module mist_core(
     .gpr_we_e_o            ( gpr_we           [e] ),
 
     .ill_instr_e_o         ( ill_instr        [e] ),
+    .pd_opcode_e_o         ( opcode           [e] ),
 
     .csr_op_e_o            ( csr_op           [e] ),
     .csr_we_e_o            ( csr_we           [e] ),

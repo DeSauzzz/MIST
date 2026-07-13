@@ -1,3 +1,5 @@
+import mist_decoder_pkg::*;
+
 module mist_hu(
   input  logic        clk_i,
   input  logic        rstn_i,
@@ -5,15 +7,18 @@ module mist_hu(
   // From fetch stage
   input  logic [4:0]  hu_rs1_addr_f_i,
   input  logic [4:0]  hu_rs2_addr_f_i,
+  input  logic [6:0]  hu_opcode_f_i,
 
   // From decode stage
   input  logic [4:0]  hu_rs1_addr_d_i,
   input  logic [4:0]  hu_rs2_addr_d_i,
   input  logic [4:0]  hu_rd_addr_d_i,
+  input  logic [6:0]  hu_opcode_d_i,
 
   // From execute stage
   input  logic [4:0]  hu_rd_addr_e_i,
   input  logic [31:0] hu_frw_result_e_i,
+  input  logic [6:0]  hu_opcode_e_i,
 
   // From memory stage
   input  logic [4:0]  hu_rd_addr_m_i,
@@ -66,17 +71,35 @@ module mist_hu(
   assign hu_flush_e_o = ( hu_flush_req_e_i );
   assign hu_flush_m_o = 1'd0;
 
+  // Function for resolving conflicts detected at the decode stage
+  function automatic logic d_hazard_detector(
+    input logic [4:0] rd_addr,
+    input logic [4:0] rs1_addr,
+    input logic [4:0] rs2_addr,
+    input logic [6:0] opcode
+  );
+    case( opcode )
+      OP_OPCODE,
+      STORE_OPCODE,
+      BRANCH_OPCODE: d_hazard_detector = ( ( rd_addr == rs1_addr ) || ( rd_addr == rs2_addr ) ) && ( rd_addr != 5'd0 );
+      IMM_OPCODE,
+      JAL_OPCODE,
+      LOAD_OPCODE:   d_hazard_detector = ( rd_addr == rs1_addr ) && ( rd_addr != 5'd0 );
+      default:       d_hazard_detector = 1'd0;
+    endcase
+  endfunction
+
   // D -> E Conflict detection
   logic  detect_de_hazard;
-  assign detect_de_hazard = ( ( hu_rd_addr_d_i == hu_rs1_addr_f_i ) || ( hu_rd_addr_d_i == hu_rs2_addr_f_i ) ) && ( hu_rd_addr_d_i != 5'd0 );
+  assign detect_de_hazard = d_hazard_detector( hu_rd_addr_d_i, hu_rs1_addr_f_i, hu_rs2_addr_f_i, hu_opcode_f_i );
 
   // D -> M Conflict detection
   logic  detect_dm_hazard;
-  assign detect_dm_hazard = ( ( hu_rd_addr_e_i == hu_rs1_addr_f_i ) || ( hu_rd_addr_e_i == hu_rs2_addr_f_i ) ) && ( hu_rd_addr_e_i != 5'd0 );
+  assign detect_dm_hazard = d_hazard_detector( hu_rd_addr_e_i, hu_rs1_addr_f_i, hu_rs2_addr_f_i, hu_opcode_f_i );
 
   // D -> W Conflict detection
   logic  detect_dw_hazard;
-  assign detect_dw_hazard = ( ( hu_rd_addr_m_i == hu_rs1_addr_f_i ) || ( hu_rd_addr_m_i == hu_rs2_addr_f_i ) ) && ( hu_rd_addr_m_i != 5'd0 );
+  assign detect_dw_hazard = d_hazard_detector( hu_rd_addr_m_i, hu_rs1_addr_f_i, hu_rs2_addr_f_i, hu_opcode_f_i );
 
   // Informing the decode stage about the conflict resolution
   assign hu_raw_solve_d_o = ( detect_dm_hazard ) || ( detect_dw_hazard );

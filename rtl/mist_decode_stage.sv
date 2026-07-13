@@ -14,6 +14,7 @@ module mist_decode_stage(
 
   // From fetch stage
   input  logic [31:0] instr_f_i,
+  input  logic [6: 0] pd_opcode_f_i,
   input  logic [31:0] pc_cur_f_i,
 
   // From wb stage
@@ -46,6 +47,7 @@ module mist_decode_stage(
   output logic        gpr_we_d_o,
 
   output logic        ill_instr_d_o,
+  output logic [6:0]  pd_opcode_d_o,
 
   output logic [2:0]  csr_op_d_o,
   output logic        csr_we_d_o,
@@ -228,6 +230,7 @@ module mist_decode_stage(
       gpr_wa_d_o    <= 5'd0;
       gpr_we_d_o    <= 1'd0;
       ill_instr_d_o <= 1'd0;
+      pd_opcode_d_o <= 7'd0;
       csr_op_d_o    <= 3'd0;
       csr_we_d_o    <= 1'd0;
       branch_d_o    <= 1'd0;
@@ -249,6 +252,7 @@ module mist_decode_stage(
       gpr_wa_d_o    <= 5'd0;
       gpr_we_d_o    <= 1'd0;
       ill_instr_d_o <= 1'd0;
+      pd_opcode_d_o <= 7'd0;
       csr_op_d_o    <= 3'd0;
       csr_we_d_o    <= 1'd0;
       branch_d_o    <= 1'd0;
@@ -270,6 +274,7 @@ module mist_decode_stage(
       gpr_wa_d_o    <= gpr_wr_addr;
       gpr_we_d_o    <= d_gpr_we;
       ill_instr_d_o <= ill_instr;
+      pd_opcode_d_o <= pd_opcode_f_i;
       csr_op_d_o    <= csr_op;
       csr_we_d_o    <= csr_we;
       branch_d_o    <= branch;

@@ -13,6 +13,7 @@ module mist_execute_stage(
   input  logic        gpr_we_d_i,
 
   input  logic        ill_instr_d_i,
+  input  logic [6:0]  pd_opcode_d_i,
 
   input  logic [2:0]  csr_op_d_i,
   input  logic        csr_we_d_i,
@@ -58,6 +59,7 @@ module mist_execute_stage(
   output logic        gpr_we_e_o,
 
   output logic        ill_instr_e_o,
+  output logic [6:0]  pd_opcode_e_o,
 
   output logic [2:0]  csr_op_e_o,
   output logic        csr_we_e_o,
@@ -128,6 +130,7 @@ module mist_execute_stage(
       offset_pc_e_o  <= 32'd0;
       gpr_wa_e_o     <= 5'd0;
       ill_instr_e_o  <= 1'd0;
+      pd_opcode_e_o  <= 7'd0;
       csr_op_e_o     <= 3'd0;
       csr_we_e_o     <= 1'd0;
       branch_e_o     <= 1'd0;
@@ -147,6 +150,7 @@ module mist_execute_stage(
       offset_pc_e_o  <= 32'd0;
       gpr_wa_e_o     <= 5'd0;
       ill_instr_e_o  <= 1'd0;
+      pd_opcode_e_o  <= 7'd0;
       csr_op_e_o     <= 3'd0;
       csr_we_e_o     <= 1'd0;
       branch_e_o     <= 1'd0;
@@ -166,6 +170,7 @@ module mist_execute_stage(
       offset_pc_e_o  <= offset_pc;
       gpr_wa_e_o     <= gpr_wa_d_i;
       ill_instr_e_o  <= ill_instr_d_i;
+      pd_opcode_e_o  <= pd_opcode_d_i;
       csr_op_e_o     <= csr_op_d_i;
       csr_we_e_o     <= csr_we_d_i;
       branch_e_o     <= branch_d_i;
