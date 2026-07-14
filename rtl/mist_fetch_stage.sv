@@ -32,7 +32,7 @@ module mist_fetch_stage #(
   always_ff @( posedge clk_i ) begin
     if( !rstn_i )
       pc_cur <= 32'd0;
-    else
+    else if( !hu_stall_f_i )
       pc_cur <= pc_nxt;
   end
 
