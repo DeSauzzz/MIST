@@ -79,13 +79,13 @@ module mist_hu(
     input logic [6:0] opcode
   );
     case( opcode )
-      OP_OPCODE,
-      STORE_OPCODE,
-      BRANCH_OPCODE: d_hazard_detector = ( ( rd_addr == rs1_addr ) || ( rd_addr == rs2_addr ) ) && ( rd_addr != 5'd0 );
-      IMM_OPCODE,
-      JAL_OPCODE,
-      LOAD_OPCODE:   d_hazard_detector = ( rd_addr == rs1_addr ) && ( rd_addr != 5'd0 );
-      default:       d_hazard_detector = 1'd0;
+      { OP_OPCODE,     2'b11 },
+      { STORE_OPCODE,  2'b11 },
+      { BRANCH_OPCODE, 2'b11 }: d_hazard_detector = ( ( rd_addr == rs1_addr ) || ( rd_addr == rs2_addr ) ) && ( rd_addr != 5'd0 );
+      { IMM_OPCODE,    2'b11 },
+      { JAL_OPCODE,    2'b11 },
+      { LOAD_OPCODE,   2'b11 }: d_hazard_detector = ( rd_addr == rs1_addr ) && ( rd_addr != 5'd0 );
+      default:                  d_hazard_detector = 1'd0;
     endcase
   endfunction
 

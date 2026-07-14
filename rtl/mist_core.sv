@@ -359,15 +359,18 @@ module mist_core(
     // From fetch stage
     .hu_rs1_addr_f_i       ( hu_rs1_addr      [f] ),
     .hu_rs2_addr_f_i       ( hu_rs2_addr      [f] ),
+    .hu_opcode_f_i         ( opcode           [f] ),
 
     // From decode stage
     .hu_rs1_addr_d_i       ( hu_rs1_addr      [d] ),
     .hu_rs2_addr_d_i       ( hu_rs2_addr      [d] ),
     .hu_rd_addr_d_i        ( hu_rd_addr       [d] ),
+    .hu_opcode_d_i         ( opcode           [d] ),
 
     // From execute stage
     .hu_rd_addr_e_i        ( hu_rd_addr       [e] ),
     .hu_frw_result_e_i     ( hu_frw_result    [e] ),
+    .hu_opcode_e_i         ( opcode           [e] ),
 
     // From memory stage
     .hu_rd_addr_m_i        ( hu_rd_addr       [m] ),

@@ -93,7 +93,7 @@ module mist_memory_stage(
 
   // To Hazard Unit
   assign hu_frw_res_m_o = ( ( lsu_req_e_i ) && !( lsu_we_e_i ) ) ? ( lsu_rd ) : ( alu_result_e_i );
-  assign hu_rd_addr_m_i = gpr_wa_e_i;
+  assign hu_rd_addr_m_i = ( ( lsu_req_e_i ) &&  ( lsu_we_e_i ) ) ? ( 5'd0   ) : ( gpr_wa_e_i     );
 
   // To writeback stage
   always_ff @( posedge clk_i ) begin
