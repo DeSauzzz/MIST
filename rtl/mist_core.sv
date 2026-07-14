@@ -240,7 +240,7 @@ module mist_core(
 
     // From Hazard unit
     .hu_stall_e_i          ( hu_stall         [e] ),
-    .hu_flush_e_i          ( hu_stall         [e] ),
+    .hu_flush_e_i          ( hu_flush         [e] ),
 
     .hu_raw_solve_op_a_e_i ( hu_raw_solve_op_a[e] ),
     .hu_raw_solve_op_b_e_i ( hu_raw_solve_op_b[e] ),
@@ -314,7 +314,7 @@ module mist_core(
 
     // From Hazard unit
     .hu_stall_m_i          ( hu_stall         [m] ),
-    .hu_flush_m_i          ( hu_stall         [m] ),
+    .hu_flush_m_i          ( hu_flush         [m] ),
 
     // From data memory
     .mem_rd_m_i            ( mem_rd           [m] ),
