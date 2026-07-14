@@ -66,7 +66,7 @@ module mist_core(
   logic        gpr_we            [d:w];
 
   logic [31:0] lsu_rd            [m:w];
-  logic [31:0] lsu_wd            [e:e];
+  logic [31:0] lsu_wd            [d:e];
   logic [2:0]  lsu_size          [d:e];
   logic        lsu_req           [d:e];
   logic        lsu_we            [d:e];
@@ -194,6 +194,7 @@ module mist_core(
     .lsu_req_d_o           ( lsu_req          [d] ),
     .lsu_we_d_o            ( lsu_we           [d] ),
     .lsu_size_d_o          ( lsu_size         [d] ),
+    .lsu_wd_d_o            ( lsu_wd           [d] ),
 
     .alu_op_d_o            ( alu_op           [d] ),
 
@@ -230,6 +231,7 @@ module mist_core(
     .lsu_req_d_i           ( lsu_req          [d] ),
     .lsu_we_d_i            ( lsu_we           [d] ),
     .lsu_size_d_i          ( lsu_size         [d] ),
+    .lsu_wd_d_i            ( lsu_wd           [d] ),
 
     .alu_op_d_i            ( alu_op           [d] ),
 

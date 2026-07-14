@@ -59,6 +59,7 @@ module mist_decode_stage(
   output logic        lsu_req_d_o,
   output logic        lsu_we_d_o,
   output logic [2:0]  lsu_size_d_o,
+  output logic [31:0] lsu_wd_d_o,
 
   output logic [3:0]  alu_op_d_o,
 
@@ -239,6 +240,7 @@ module mist_decode_stage(
       lsu_req_d_o   <= 1'd0;
       lsu_we_d_o    <= 1'd0;
       lsu_size_d_o  <= 3'd0;
+      lsu_wd_d_o    <= 32'd0;
       alu_op_d_o    <= 4'd0;
       mret_d_o      <= 1'd0;
       wb_sel_d_o    <= 2'd0;
@@ -261,6 +263,7 @@ module mist_decode_stage(
       lsu_req_d_o   <= 1'd0;
       lsu_we_d_o    <= 1'd0;
       lsu_size_d_o  <= 3'd0;
+      lsu_wd_d_o    <= 32'd0;
       alu_op_d_o    <= 4'd0;
       mret_d_o      <= 1'd0;
       wb_sel_d_o    <= 2'd0;
@@ -283,6 +286,7 @@ module mist_decode_stage(
       lsu_req_d_o   <= lsu_req;
       lsu_we_d_o    <= lsu_we;
       lsu_size_d_o  <= lsu_size;
+      lsu_wd_d_o    <= gpr_rd_data2;
       alu_op_d_o    <= alu_op;
       mret_d_o      <= mret;
       wb_sel_d_o    <= wb_sel;

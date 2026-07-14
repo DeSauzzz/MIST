@@ -2,8 +2,8 @@ import mist_mem_pkg::DATA_MEM_BYTE_SIZE;
 import mist_mem_pkg::DATA_MEM_WORD_SIZE;
 
 module mist_data_mem(
-  input  logic clk_i,
-  input  logic rstn_i,
+  input  logic        clk_i,
+  input  logic        rstn_i,
 
   input  logic [3:0]  mem_be_i,
   input  logic        mem_req_i,
@@ -45,16 +45,16 @@ module mist_data_mem(
   end
 
   // Memory logic
-  logic [31:0] rd_data_ff;
+  logic [31:0] mem_rd_ff;
 
   always_ff @( posedge clk_i ) begin
     if( ( mem_req_i ) && !( mem_we_i ) )
-      rd_data_ff <= memory[mem_addr_i];
+      mem_rd_ff <= memory[mem_addr_i];
     else if( ( mem_req_i ) && ( mem_we_i ) )
       memory[mem_addr_i] <= wr_data;
   end
 
   assign mem_ack_o   = mem_ack_ff;
-  assign read_data_o = rd_data_ff;
+  assign mem_rd_o    = mem_rd_ff;
 
 endmodule

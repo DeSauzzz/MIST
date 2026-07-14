@@ -25,6 +25,7 @@ module mist_execute_stage(
   input  logic        lsu_req_d_i,
   input  logic        lsu_we_d_i,
   input  logic [2:0]  lsu_size_d_i,
+  input  logic [31:0] lsu_wd_d_i,
 
   input  logic [3:0]  alu_op_d_i,
 
@@ -179,7 +180,7 @@ module mist_execute_stage(
       lsu_req_e_o    <= lsu_req_d_i;
       lsu_we_e_o     <= lsu_we_d_i;
       lsu_size_e_o   <= lsu_size_d_i;
-      lsu_wd_e_o     <= op_b_d_i;
+      lsu_wd_e_o     <= lsu_wd_d_i;
       gpr_we_e_o     <= gpr_we_d_i;
       mret_e_o       <= mret_d_i;
       wb_sel_e_o     <= wb_sel_d_i;
