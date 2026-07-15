@@ -12,7 +12,6 @@ module mist_hu(
   // From decode stage
   input  logic [4:0]  hu_rs1_addr_d_i,
   input  logic [4:0]  hu_rs2_addr_d_i,
-  input  logic [4:0]  hu_rd_addr_d_i,
   input  logic [6:0]  hu_opcode_d_i,
 
   // From execute stage
@@ -83,15 +82,11 @@ module mist_hu(
       { STORE_OPCODE,  2'b11 },
       { BRANCH_OPCODE, 2'b11 }: d_hazard_detector = ( ( rd_addr == rs1_addr ) || ( rd_addr == rs2_addr ) ) && ( rd_addr != 5'd0 );
       { IMM_OPCODE,    2'b11 },
-      { JAL_OPCODE,    2'b11 },
+      { JALR_OPCODE,   2'b11 },
       { LOAD_OPCODE,   2'b11 }: d_hazard_detector = ( rd_addr == rs1_addr ) && ( rd_addr != 5'd0 );
       default:                  d_hazard_detector = 1'd0;
     endcase
   endfunction
-
-  // D -> E Conflict detection
-  logic  detect_de_hazard;
-  assign detect_de_hazard = d_hazard_detector( hu_rd_addr_d_i, hu_rs1_addr_f_i, hu_rs2_addr_f_i, hu_opcode_f_i );
 
   // D -> M Conflict detection
   logic  detect_dm_hazard;
@@ -110,29 +105,37 @@ module mist_hu(
                             ( detect_dw_hazard ) ?  ( hu_frw_result_m_i   ) : ( 32'd0 );
 
   // E -> M Conflict detection
-  // logic detect_em_hazard_rs1_ff;
-  // logic detect_em_hazard_rs2_ff;
+  function automatic logic e_hazard_detector_rs1(
+    input logic [4:0] rd_addr,
+    input logic [4:0] rs1_addr,
+    input logic [6:0] opcode
+  );
+    case( opcode )
+      { OP_OPCODE,     2'b11 },
+      { STORE_OPCODE,  2'b11 },
+      { BRANCH_OPCODE, 2'b11 },
+      { IMM_OPCODE,    2'b11 },
+      { JALR_OPCODE,   2'b11 },
+      { LOAD_OPCODE,   2'b11 }: e_hazard_detector_rs1 = ( rd_addr == rs1_addr ) && ( rd_addr != 5'd0 );
+      default:                  e_hazard_detector_rs1 = 1'd0;
+    endcase
+  endfunction
 
-  // always_ff @( posedge clk_i ) begin
-  //   if( !rstn_i )
-  //     detect_em_hazard_rs1_ff <= 1'd0;
-  //   else if( ( detect_em_hazard_rs1_ff ) && !( stall_req ) )
-  //     detect_em_hazard_rs1_ff <= 1'd0;
-  //   else if( ( hu_rd_addr_m_i == hu_rs1_addr_d_i ) && ( hu_rd_addr_m_i != 5'd0 ) )
-  //     detect_em_hazard_rs1_ff <= 1'd1;
-  // end
+  function automatic logic e_hazard_detector_rs2(
+    input logic [4:0] rd_addr,
+    input logic [4:0] rs1_addr,
+    input logic [6:0] opcode
+  );
+    case( opcode )
+      { OP_OPCODE,     2'b11 },
+      { STORE_OPCODE,  2'b11 },
+      { BRANCH_OPCODE, 2'b11 }: e_hazard_detector_rs2 = ( rd_addr == rs1_addr ) && ( rd_addr != 5'd0 );
+      default:                  e_hazard_detector_rs2 = 1'd0;
+    endcase
+  endfunction
 
-  // always_ff @( posedge clk_i ) begin
-  //   if( !rstn_i )
-  //     detect_em_hazard_rs2_ff <= 1'd0;
-  //   else if( ( detect_em_hazard_rs2_ff ) && !( stall_req ) )
-  //     detect_em_hazard_rs2_ff <= 1'd0;
-  //   else if( ( hu_rd_addr_m_i == hu_rs2_addr_d_i ) && ( hu_rd_addr_m_i != 5'd0 ) )
-  //     detect_em_hazard_rs2_ff <= 1'd1;
-  // end
-
-  assign hu_raw_rs1_solve_e_o = 1'd0;
-  assign hu_raw_rs2_solve_e_o = 1'd0;
+  assign hu_raw_rs1_solve_e_o = e_hazard_detector_rs1( hu_rd_addr_e_i, hu_rs1_addr_d_i, hu_opcode_d_i );
+  assign hu_raw_rs2_solve_e_o = e_hazard_detector_rs2( hu_rd_addr_e_i, hu_rs2_addr_d_i, hu_opcode_d_i );
 
   assign hu_op_a_e_o          = hu_frw_result_m_i;
   assign hu_op_b_e_o          = hu_frw_result_m_i;

@@ -25,7 +25,7 @@ module mist_core(
 
   logic [4:0]  hu_rs1_addr       [f:d];
   logic [4:0]  hu_rs2_addr       [f:d];
-  logic [4:0]  hu_rd_addr        [d:m];
+  logic [4:0]  hu_rd_addr        [e:m];
 
   logic        hu_raw_solve      [d:d];
   logic        hu_raw_solve_op_a [e:e];
@@ -167,9 +167,8 @@ module mist_core(
     .hu_flush_d_i          ( hu_flush         [d] ),
 
     // To Hazard Unit
-    .hu_rs1_addr_o         ( hu_rs1_addr      [d] ),
-    .hu_rs2_addr_o         ( hu_rs2_addr      [d] ),
-    .hu_rd_addr_o          ( hu_rd_addr       [d] ),
+    .hu_rs1_addr_d_o       ( hu_rs1_addr      [d] ),
+    .hu_rs2_addr_d_o       ( hu_rs2_addr      [d] ),
 
     // To execute stage
     .imm_b_d_o             ( imm_b            [d] ),
@@ -364,7 +363,6 @@ module mist_core(
     // From decode stage
     .hu_rs1_addr_d_i       ( hu_rs1_addr      [d] ),
     .hu_rs2_addr_d_i       ( hu_rs2_addr      [d] ),
-    .hu_rd_addr_d_i        ( hu_rd_addr       [d] ),
     .hu_opcode_d_i         ( opcode           [d] ),
 
     // From execute stage

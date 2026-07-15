@@ -32,9 +32,8 @@ module mist_decode_stage(
   input  logic        hu_flush_d_i,
 
   // To Hazard Unit
-  output logic [4:0]  hu_rs1_addr_o,
-  output logic [4:0]  hu_rs2_addr_o,
-  output logic [4:0]  hu_rd_addr_o,
+  output logic [4:0]  hu_rs1_addr_d_o,
+  output logic [4:0]  hu_rs2_addr_d_o,
 
   // To execute stage
   output logic [31:0] imm_b_d_o,
@@ -172,15 +171,14 @@ module mist_decode_stage(
   logic [31:0] gpr_rd_data1;
   logic [31:0] gpr_rd_data2;
 
-  assign gpr_rd_addr1  = instr_f_i[19:15];
-  assign gpr_rd_addr2  = instr_f_i[24:20];
+  assign gpr_rd_addr1    = instr_f_i[19:15];
+  assign gpr_rd_addr2    = instr_f_i[24:20];
 
-  assign gpr_wr_addr   = instr_f_i[11:7];
+  assign gpr_wr_addr     = instr_f_i[11:7];
 
   // To Hazard Unit
-  assign hu_rs1_addr_o = gpr_rd_addr1;
-  assign hu_rs2_addr_o = gpr_rd_addr2;
-  assign hu_rd_addr_o  = gpr_wr_addr;
+  assign hu_rs1_addr_d_o = gpr_rd_addr1;
+  assign hu_rs2_addr_d_o = gpr_rd_addr2;
 
   mist_gpr d_gpr (
     .clk_i      ( clk_i         ),
