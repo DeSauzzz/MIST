@@ -42,18 +42,19 @@ module mist_core(
   logic [31:0] instr             [f:f];
   logic [31:0] pc_cur            [f:d];
 
-  logic        branch            [d:w];
-  logic        jalr              [d:w];
-  logic        jal               [d:w];
+  logic        branch            [d:e];
+  logic        jalr              [d:e];
+  logic        jal               [d:e];
 
-  logic [31:0] offset_pc         [e:w];
+  logic [31:0] offset_bj_pc      [e:e];
+  logic [31:0] offset_jr_pc      [e:e];
 
   logic [31:0] imm_b             [d:d];
   logic [31:0] imm_j             [d:d];
 
   logic [31:0] alu_result        [e:w];
   logic [3:0]  alu_op            [d:d];
-  logic        alu_flag          [e:w];
+  logic        alu_flag          [e:e];
 
   logic [31:0] op_a              [d:d];
   logic [31:0] op_b              [d:d];
@@ -85,14 +86,7 @@ module mist_core(
   // Writeback stage //
   /////////////////////
 
-  assign branch    [w]  = branch    [m];
-  assign jalr      [w]  = jalr      [m];
-  assign jal       [w]  = jal       [m];
-
-  assign offset_pc [w]  = offset_pc [m];
-
   assign alu_result[w]  = alu_result[m];
-  assign alu_flag  [w]  = alu_flag  [m];
 
   assign gpr_wa    [w]  = gpr_wa    [m];
   assign gpr_we    [w]  = gpr_we    [m];
@@ -100,9 +94,6 @@ module mist_core(
   assign lsu_rd    [w]  = lsu_rd    [m];
 
   assign wb_sel    [w]  = wb_sel    [m];
-
-  logic  branch_jal_wb;
-  assign branch_jal_wb  = ( alu_flag[w] && branch[w] ) || ( jal[w] );
 
   always_comb begin
     case( wb_sel[w] )
@@ -123,11 +114,13 @@ module mist_core(
     .clk_i                 ( clk_i                ),
     .rstn_i                ( rstn_i               ),
 
-    // From Write-back stage
-    .jalr_wb_i             ( jalr             [w] ),
-    .branch_jal_wb_i       ( branch_jal_wb        ),
-    .offset_pc_wb_i        ( offset_pc        [w] ),
-    .offset_alu_wb_i       ( alu_result       [w] ),
+    // From execute stage
+    .alu_flag_e_i          ( alu_flag         [e] ),
+    .branch_e_i            ( branch           [e] ),
+    .jalr_e_i              ( jalr             [e] ),
+    .jal_e_i               ( jal              [e] ),
+    .offset_bj_pc_e_i      ( offset_bj_pc     [e] ),
+    .offset_jr_pc_e_i      ( offset_jr_pc     [e] ),
 
     // From Hazard Unit
     .hu_stall_f_i          ( hu_stall         [f] ),
@@ -252,14 +245,19 @@ module mist_core(
     // To Hazard Unit
     .hu_flush_req_e_o      ( hu_flush_req     [e] ),
 
+    // To fetch stage
+    .alu_flag_e_o          ( alu_flag         [e] ),
+    .branch_e_o            ( branch           [e] ),
+    .jalr_e_o              ( jalr             [e] ),
+    .jal_e_o               ( jal              [e] ),
+    .offset_bj_pc_e_o      ( offset_bj_pc     [e] ),
+    .offset_jr_pc_e_o      ( offset_jr_pc     [e] ),
+
     .hu_rd_addr_e_o        ( hu_rd_addr       [e] ),
     .hu_frw_result_e_o     ( hu_frw_result    [e] ),
 
     // To memory stage
     .alu_result_e_o        ( alu_result       [e] ),
-    .alu_flag_e_o          ( alu_flag         [e] ),
-
-    .offset_pc_e_o         ( offset_pc        [e] ),
 
     .gpr_wa_e_o            ( gpr_wa           [e] ),
     .gpr_we_e_o            ( gpr_we           [e] ),
@@ -269,10 +267,6 @@ module mist_core(
 
     .csr_op_e_o            ( csr_op           [e] ),
     .csr_we_e_o            ( csr_we           [e] ),
-
-    .branch_e_o            ( branch           [e] ),
-    .jalr_e_o              ( jalr             [e] ),
-    .jal_e_o               ( jal              [e] ),
 
     .lsu_req_e_o           ( lsu_req          [e] ),
     .lsu_we_e_o            ( lsu_we           [e] ),
@@ -289,9 +283,6 @@ module mist_core(
 
     // From execute stage
     .alu_result_e_i        ( alu_result       [e] ),
-    .alu_flag_e_i          ( alu_flag         [e] ),
-
-    .offset_pc_e_i         ( offset_pc        [e] ),
 
     .gpr_wa_e_i            ( gpr_wa           [e] ),
     .gpr_we_e_i            ( gpr_we           [e] ),
@@ -300,10 +291,6 @@ module mist_core(
 
     .csr_op_e_i            ( csr_op           [e] ),
     .csr_we_e_i            ( csr_we           [e] ),
-
-    .branch_e_i            ( branch           [e] ),
-    .jalr_e_i              ( jalr             [e] ),
-    .jal_e_i               ( jal              [e] ),
 
     .lsu_req_e_i           ( lsu_req          [e] ),
     .lsu_we_e_i            ( lsu_we           [e] ),
@@ -337,16 +324,9 @@ module mist_core(
     .lsu_rd_m_o            ( lsu_rd           [m] ),
 
     .alu_result_m_o        ( alu_result       [m] ),
-    .alu_flag_m_o          ( alu_flag         [m] ),
-
-    .offset_pc_m_o         ( offset_pc        [m] ),
 
     .gpr_wa_m_o            ( gpr_wa           [m] ),
     .gpr_we_m_o            ( gpr_we           [m] ),
-
-    .branch_m_o            ( branch           [m] ),
-    .jalr_m_o              ( jalr             [m] ),
-    .jal_m_o               ( jal              [m] ),
 
     .wb_sel_m_o            ( wb_sel           [m] )
   );

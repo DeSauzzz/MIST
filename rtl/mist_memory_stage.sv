@@ -4,9 +4,6 @@ module mist_memory_stage(
 
   // From execute stage
   input  logic [31:0] alu_result_e_i, // Can be data memory address
-  input  logic        alu_flag_e_i,
-
-  input  logic [31:0] offset_pc_e_i,
 
   input  logic [4:0]  gpr_wa_e_i,
   input  logic        gpr_we_e_i,
@@ -15,10 +12,6 @@ module mist_memory_stage(
 
   input  logic [2:0]  csr_op_e_i,
   input  logic        csr_we_e_i,
-
-  input  logic        branch_e_i,
-  input  logic        jalr_e_i,
-  input  logic        jal_e_i,
 
   input  logic        lsu_req_e_i,
   input  logic        lsu_we_e_i,
@@ -52,16 +45,9 @@ module mist_memory_stage(
   output logic [31:0] lsu_rd_m_o,
 
   output logic [31:0] alu_result_m_o,
-  output logic        alu_flag_m_o,
-
-  output logic [31:0] offset_pc_m_o,
 
   output logic [4:0]  gpr_wa_m_o,
   output logic        gpr_we_m_o,
-
-  output logic        branch_m_o,
-  output logic        jalr_m_o,
-  output logic        jal_m_o,
 
   output logic [1:0]  wb_sel_m_o
 );
@@ -100,37 +86,22 @@ module mist_memory_stage(
     if( !rstn_i ) begin
       lsu_rd_m_o     <= lsu_rd;
       alu_result_m_o <= 32'd0;
-      alu_flag_m_o   <= 1'd0;
-      offset_pc_m_o  <= 32'd0;
       gpr_wa_m_o     <= 5'd0;
       gpr_we_m_o     <= 1'd0;
-      branch_m_o     <= 1'd0;
-      jalr_m_o       <= 1'd0;
-      jal_m_o        <= 1'd0;
       wb_sel_m_o     <= 2'd0;
     end
     else if( hu_flush_m_i ) begin
       lsu_rd_m_o     <= lsu_rd;
       alu_result_m_o <= 32'd0;
-      alu_flag_m_o   <= 1'd0;
-      offset_pc_m_o  <= 32'd0;
       gpr_wa_m_o     <= 5'd0;
       gpr_we_m_o     <= 1'd0;
-      branch_m_o     <= 1'd0;
-      jalr_m_o       <= 1'd0;
-      jal_m_o        <= 1'd0;
       wb_sel_m_o     <= 2'd0;
     end
     else if( !hu_stall_m_i ) begin
       lsu_rd_m_o     <= lsu_rd;
       alu_result_m_o <= alu_result_e_i;
-      alu_flag_m_o   <= alu_flag_e_i;
-      offset_pc_m_o  <= offset_pc_e_i;
       gpr_wa_m_o     <= gpr_wa_e_i;
       gpr_we_m_o     <= gpr_we_e_i;
-      branch_m_o     <= branch_e_i;
-      jalr_m_o       <= jalr_e_i;
-      jal_m_o        <= jal_e_i;
       wb_sel_m_o     <= wb_sel_e_i;
     end
   end

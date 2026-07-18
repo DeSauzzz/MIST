@@ -67,7 +67,7 @@ module mist_hu(
 
   assign hu_flush_f_o = ( hu_flush_req_e_i );
   assign hu_flush_d_o = ( hu_flush_req_e_i );
-  assign hu_flush_e_o = ( hu_flush_req_e_i );
+  assign hu_flush_e_o = 1'd0;
   assign hu_flush_m_o = 1'd0;
 
   // Function for resolving conflicts detected at the decode stage

@@ -4,11 +4,13 @@ module mist_fetch_stage #(
   input  logic        clk_i,
   input  logic        rstn_i,
 
-  // From Write-back stage
-  input  logic        jalr_wb_i,
-  input  logic        branch_jal_wb_i,
-  input  logic [31:0] offset_pc_wb_i,
-  input  logic [31:0] offset_alu_wb_i,
+  // From execute stage
+  input  logic        alu_flag_e_i,
+  input  logic        branch_e_i,
+  input  logic        jalr_e_i,
+  input  logic        jal_e_i,
+  input  logic [31:0] offset_bj_pc_e_i,
+  input  logic [31:0] offset_jr_pc_e_i,
 
   // From Hazard Unit
   input  logic        hu_stall_f_i,
@@ -36,9 +38,9 @@ module mist_fetch_stage #(
       pc_cur <= pc_nxt;
   end
 
-  assign pc_nxt = ( jalr_wb_i       ) ? ( pc_cur + offset_alu_wb_i ):
-                  ( branch_jal_wb_i ) ? ( pc_cur + offset_pc_wb_i  ):
-                                        ( pc_cur + 32'd4           );
+  assign pc_nxt = ( ( jalr_e_i )                                  ) ? ( offset_jr_pc_e_i ):
+                  ( ( branch_e_i && alu_flag_e_i ) || ( jal_e_i ) ) ? ( offset_bj_pc_e_i ):
+                                                                      ( pc_cur + 32'd4   );
 
   always_ff @( posedge clk_i ) begin
     if( !rstn_i ) begin
