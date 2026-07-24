@@ -2,8 +2,8 @@ ENTRY(_start)
 
 MEMORY
 {
-    instr_mem (rw) : ORIGIN = 0x00000000, LENGTH=1k
-    data_mem  (rwx): ORIGIN = 0x00000000, LENGTH=2k
+    instr_mem (rw) : ORIGIN = 0x00000000, LENGTH = 1k
+    data_mem  (rwx): ORIGIN = 0x00000000, LENGTH = 2k
 }
 
 SECTIONS
