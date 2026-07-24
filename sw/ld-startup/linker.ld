@@ -2,8 +2,8 @@ ENTRY(_start)
 
 MEMORY
 {
-    instr_mem (rw) : ORIGIN = 0x00000000, LENGTH = 1k
-    data_mem  (rwx): ORIGIN = 0x00000000, LENGTH = 2k
+    instr_mem (rw) : ORIGIN = 0x80000400, LENGTH = 1k
+    data_mem  (rwx): ORIGIN = 0x80000800, LENGTH = 2k
 }
 
 SECTIONS
@@ -31,7 +31,7 @@ SECTIONS
         . = ALIGN(4);
     } > instr_mem
 
-    .data : AT (0x80000000)
+    .data :
     {
         . = ALIGN(4);
 
