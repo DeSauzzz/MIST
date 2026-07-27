@@ -309,7 +309,7 @@ module mist_core(
     .mem_ack_m_i           ( mem_ack          [m] ),
 
     // To Hazard unit
-    .hu_rd_addr_m_i        ( hu_rd_addr       [m] ),
+    .hu_rd_addr_m_o        ( hu_rd_addr       [m] ),
     .hu_frw_res_m_o        ( hu_frw_result    [m] ),
     .hu_stall_req_m_o      ( hu_stall_req     [m] ),
 
