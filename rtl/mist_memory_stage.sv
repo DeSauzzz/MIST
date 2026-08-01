@@ -9,6 +9,7 @@ module mist_memory_stage(
   input  logic        gpr_we_e_i,
 
   input  logic        ill_instr_e_i,
+  input  logic [6:0]  pd_opcode_e_i,
 
   input  logic [2:0]  csr_op_e_i,
   input  logic        csr_we_e_i,
@@ -33,6 +34,8 @@ module mist_memory_stage(
   output logic [4:0]  hu_rd_addr_m_o,
   output logic [31:0] hu_frw_res_m_o,
   output logic        hu_stall_req_m_o,
+
+  output logic [6:0]  pd_opcode_m_o,
 
   // To data memory
   output logic [3:0]  mem_be_m_o,
@@ -86,6 +89,7 @@ module mist_memory_stage(
     if( !rstn_i ) begin
       lsu_rd_m_o     <= lsu_rd;
       alu_result_m_o <= 32'd0;
+      pd_opcode_m_o  <= 7'd0;
       gpr_wa_m_o     <= 5'd0;
       gpr_we_m_o     <= 1'd0;
       wb_sel_m_o     <= 2'd0;
@@ -93,6 +97,7 @@ module mist_memory_stage(
     else if( hu_flush_m_i ) begin
       lsu_rd_m_o     <= lsu_rd;
       alu_result_m_o <= 32'd0;
+      pd_opcode_m_o  <= 7'd0;
       gpr_wa_m_o     <= 5'd0;
       gpr_we_m_o     <= 1'd0;
       wb_sel_m_o     <= 2'd0;
@@ -100,6 +105,7 @@ module mist_memory_stage(
     else if( !hu_stall_m_i ) begin
       lsu_rd_m_o     <= lsu_rd;
       alu_result_m_o <= alu_result_e_i;
+      pd_opcode_m_o  <= pd_opcode_e_i;
       gpr_wa_m_o     <= gpr_wa_e_i;
       gpr_we_m_o     <= gpr_we_e_i;
       wb_sel_m_o     <= wb_sel_e_i;

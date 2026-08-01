@@ -24,6 +24,7 @@ module mist_hu(
   // From memory stage
   input  logic [4:0]  hu_rd_addr_m_i,
   input  logic [31:0] hu_frw_result_m_i,
+  input  logic [6:0]  hu_opcode_m_i,
 
   // To decode stage
   output logic        hu_raw_solve_d_o,
@@ -77,26 +78,29 @@ module mist_hu(
     input logic [4:0] rd_addr,
     input logic [4:0] rs1_addr,
     input logic [4:0] rs2_addr,
-    input logic [6:0] opcode
+    input logic [6:0] opcode_req,
+    input logic [6:0] opcode_resp
   );
-    case( opcode )
+    case( opcode_req )
       { OP_OPCODE,     2'b11 },
       { STORE_OPCODE,  2'b11 },
-      { BRANCH_OPCODE, 2'b11 }: d_hazard_detector = ( ( rd_addr == rs1_addr ) || ( rd_addr == rs2_addr ) ) && ( rd_addr != 5'd0 );
+      { BRANCH_OPCODE, 2'b11 }: d_hazard_detector = ( ( rd_addr == rs1_addr ) || ( rd_addr == rs2_addr ) ) && ( rd_addr != 5'd0 ) &&
+                                                   !( opcode_resp[6:2] inside { BRANCH_OPCODE, STORE_OPCODE } );
       { IMM_OPCODE,    2'b11 },
       { JALR_OPCODE,   2'b11 },
-      { LOAD_OPCODE,   2'b11 }: d_hazard_detector = ( rd_addr == rs1_addr ) && ( rd_addr != 5'd0 );
+      { LOAD_OPCODE,   2'b11 }: d_hazard_detector = ( rd_addr == rs1_addr ) && ( rd_addr != 5'd0 ) &&
+                                                   !( opcode_resp[6:2] inside { BRANCH_OPCODE, STORE_OPCODE } );
       default:                  d_hazard_detector = 1'd0;
     endcase
   endfunction
 
   // D -> M Conflict detection
   logic  detect_dm_hazard;
-  assign detect_dm_hazard = d_hazard_detector( hu_rd_addr_e_i, hu_rs1_addr_f_i, hu_rs2_addr_f_i, hu_opcode_f_i );
+  assign detect_dm_hazard = d_hazard_detector( hu_rd_addr_e_i, hu_rs1_addr_f_i, hu_rs2_addr_f_i, hu_opcode_f_i, hu_opcode_e_i );
 
   // D -> W Conflict detection
   logic  detect_dw_hazard;
-  assign detect_dw_hazard = d_hazard_detector( hu_rd_addr_m_i, hu_rs1_addr_f_i, hu_rs2_addr_f_i, hu_opcode_f_i );
+  assign detect_dw_hazard = d_hazard_detector( hu_rd_addr_m_i, hu_rs1_addr_f_i, hu_rs2_addr_f_i, hu_opcode_f_i, hu_opcode_m_i );
 
   // Informing the decode stage about the conflict resolution
   assign hu_raw_solve_d_o = ( detect_dm_hazard ) || ( detect_dw_hazard );

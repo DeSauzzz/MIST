@@ -38,7 +38,7 @@ module mist_core(
   logic        mret              [d:e];
 
   logic        ill_instr         [d:e];
-  logic [6:0]  opcode            [f:e];
+  logic [6:0]  pd_opcode          [f:m];
   logic [31:0] instr             [f:f];
   logic [31:0] pc_cur            [f:d];
 
@@ -134,7 +134,7 @@ module mist_core(
 
     // To Decode Stage
     .instr_f_o             ( instr            [f] ),
-    .pd_opcode_f_o         ( opcode           [f] ),
+    .pd_opcode_f_o         ( pd_opcode        [f] ),
     .pc_cur_f_o            ( pc_cur           [f] )
   );
 
@@ -144,7 +144,7 @@ module mist_core(
 
     // From fetch stage
     .instr_f_i             ( instr            [f] ),
-    .pd_opcode_f_i         ( opcode           [f] ),
+    .pd_opcode_f_i         ( pd_opcode        [f] ),
     .pc_cur_f_i            ( pc_cur           [f] ),
 
     // From wb stage
@@ -178,7 +178,7 @@ module mist_core(
     .gpr_we_d_o            ( gpr_we           [d] ),
 
     .ill_instr_d_o         ( ill_instr        [d] ),
-    .pd_opcode_d_o         ( opcode           [d] ),
+    .pd_opcode_d_o         ( pd_opcode        [d] ),
 
     .csr_op_d_o            ( csr_op           [d] ),
     .csr_we_d_o            ( csr_we           [d] ),
@@ -217,7 +217,7 @@ module mist_core(
     .gpr_we_d_i            ( gpr_we           [d] ),
 
     .ill_instr_d_i         ( ill_instr        [d] ),
-    .pd_opcode_d_i         ( opcode           [d] ),
+    .pd_opcode_d_i         ( pd_opcode        [d] ),
 
     .csr_op_d_i            ( csr_op           [d] ),
     .csr_we_d_i            ( csr_we           [d] ),
@@ -270,7 +270,7 @@ module mist_core(
     .gpr_we_e_o            ( gpr_we           [e] ),
 
     .ill_instr_e_o         ( ill_instr        [e] ),
-    .pd_opcode_e_o         ( opcode           [e] ),
+    .pd_opcode_e_o         ( pd_opcode        [e] ),
 
     .csr_op_e_o            ( csr_op           [e] ),
     .csr_we_e_o            ( csr_we           [e] ),
@@ -295,6 +295,7 @@ module mist_core(
     .gpr_we_e_i            ( gpr_we           [e] ),
 
     .ill_instr_e_i         ( ill_instr        [e] ),
+    .pd_opcode_e_i         ( pd_opcode        [e] ),
 
     .csr_op_e_i            ( csr_op           [e] ),
     .csr_we_e_i            ( csr_we           [e] ),
@@ -319,6 +320,8 @@ module mist_core(
     .hu_rd_addr_m_o        ( hu_rd_addr       [m] ),
     .hu_frw_res_m_o        ( hu_frw_result    [m] ),
     .hu_stall_req_m_o      ( hu_stall_req     [m] ),
+
+    .pd_opcode_m_o         ( pd_opcode        [m] ),
 
     // To data memory
     .mem_be_m_o            ( mem_be           [m] ),
@@ -345,23 +348,24 @@ module mist_core(
     // From fetch stage
     .hu_rs1_addr_f_i       ( hu_rs1_addr      [f] ),
     .hu_rs2_addr_f_i       ( hu_rs2_addr      [f] ),
-    .hu_opcode_f_i         ( opcode           [f] ),
+    .hu_opcode_f_i         ( pd_opcode        [f] ),
 
     // From decode stage
     .hu_rs1_addr_d_i       ( hu_rs1_addr      [d] ),
     .hu_rs2_addr_d_i       ( hu_rs2_addr      [d] ),
-    .hu_opcode_d_i         ( opcode           [d] ),
+    .hu_opcode_d_i         ( pd_opcode        [d] ),
 
     // From execute stage
     .hu_rs1_addr_e_i       ( hu_rs1_addr      [e] ),
     .hu_rs2_addr_e_i       ( hu_rs2_addr      [e] ),
     .hu_rd_addr_e_i        ( hu_rd_addr       [e] ),
     .hu_frw_result_e_i     ( hu_frw_result    [e] ),
-    .hu_opcode_e_i         ( opcode           [e] ),
+    .hu_opcode_e_i         ( pd_opcode        [e] ),
 
     // From memory stage
     .hu_rd_addr_m_i        ( hu_rd_addr       [m] ),
     .hu_frw_result_m_i     ( hu_frw_result    [m] ),
+    .hu_opcode_m_i         ( pd_opcode        [m] ),
 
     // To decode stage
     .hu_raw_solve_d_o      ( hu_raw_solve     [d] ),
