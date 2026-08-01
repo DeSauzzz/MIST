@@ -15,6 +15,8 @@ module mist_hu(
   input  logic [6:0]  hu_opcode_d_i,
 
   // From execute stage
+  input  logic [4:0]  hu_rs1_addr_e_i,
+  input  logic [4:0]  hu_rs2_addr_e_i,
   input  logic [4:0]  hu_rd_addr_e_i,
   input  logic [31:0] hu_frw_result_e_i,
   input  logic [6:0]  hu_opcode_e_i,
@@ -134,8 +136,8 @@ module mist_hu(
     endcase
   endfunction
 
-  assign hu_raw_rs1_solve_e_o = e_hazard_detector_rs1( hu_rd_addr_e_i, hu_rs1_addr_d_i, hu_opcode_d_i );
-  assign hu_raw_rs2_solve_e_o = e_hazard_detector_rs2( hu_rd_addr_e_i, hu_rs2_addr_d_i, hu_opcode_d_i );
+  assign hu_raw_rs1_solve_e_o = e_hazard_detector_rs1( hu_rd_addr_m_i, hu_rs1_addr_e_i, hu_opcode_e_i );
+  assign hu_raw_rs2_solve_e_o = e_hazard_detector_rs2( hu_rd_addr_m_i, hu_rs2_addr_e_i, hu_opcode_e_i );
 
   assign hu_op_a_e_o          = hu_frw_result_m_i;
   assign hu_op_b_e_o          = hu_frw_result_m_i;

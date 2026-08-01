@@ -17,8 +17,8 @@ module mist_fetch_stage #(
   input  logic        hu_flush_f_i,
 
   // To Hazard Unit
-  output logic [4:0]  pd_rs1_addr_f_o,
-  output logic [4:0]  pd_rs2_addr_f_o,
+  output logic [4:0]  hu_rs1_addr_f_o,
+  output logic [4:0]  hu_rs2_addr_f_o,
 
   // To Decode Stage
   output logic [31:0] instr_f_o,
@@ -66,8 +66,8 @@ module mist_fetch_stage #(
 
   mist_predecode f_predecode (
     .pd_instr_i  ( { instr_cur[6:0], instr_cur[24:15] } ),
-    .rs1_addr_o  ( pd_rs1_addr_f_o ),
-    .rs2_addr_o  ( pd_rs2_addr_f_o ),
+    .rs1_addr_o  ( hu_rs1_addr_f_o ),
+    .rs2_addr_o  ( hu_rs2_addr_f_o ),
     .opcode_o    ( pd_opcode_f_o   )
   );
 

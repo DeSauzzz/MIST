@@ -23,8 +23,8 @@ module mist_core(
   logic [31:0] hu_op_a           [e:e];
   logic [31:0] hu_op_b           [e:e];
 
-  logic [4:0]  hu_rs1_addr       [f:d];
-  logic [4:0]  hu_rs2_addr       [f:d];
+  logic [4:0]  hu_rs1_addr       [f:e];
+  logic [4:0]  hu_rs2_addr       [f:e];
   logic [4:0]  hu_rd_addr        [e:m];
 
   logic        hu_raw_solve      [d:d];
@@ -65,6 +65,8 @@ module mist_core(
   logic [31:0] gpr_wd            [w:w];
   logic [4:0]  gpr_wa            [d:w];
   logic        gpr_we            [d:w];
+  logic [4:0]  gpr_rs1_addr      [d:d];
+  logic [4:0]  gpr_rs2_addr      [d:d];
 
   logic [31:0] lsu_rd            [m:w];
   logic [31:0] lsu_wd            [d:e];
@@ -127,8 +129,8 @@ module mist_core(
     .hu_flush_f_i          ( hu_flush         [f] ),
 
     // To Hazard Unit
-    .pd_rs1_addr_f_o       ( hu_rs1_addr      [f] ),
-    .pd_rs2_addr_f_o       ( hu_rs2_addr      [f] ),
+    .hu_rs1_addr_f_o       ( hu_rs1_addr      [f] ),
+    .hu_rs2_addr_f_o       ( hu_rs2_addr      [f] ),
 
     // To Decode Stage
     .instr_f_o             ( instr            [f] ),
@@ -170,6 +172,8 @@ module mist_core(
     .op_a_d_o              ( op_a             [d] ),
     .op_b_d_o              ( op_b             [d] ),
 
+    .gpr_rs1_addr_d_o      ( gpr_rs1_addr     [d] ),
+    .gpr_rs2_addr_d_o      ( gpr_rs2_addr     [d] ),
     .gpr_wa_d_o            ( gpr_wa           [d] ),
     .gpr_we_d_o            ( gpr_we           [d] ),
 
@@ -207,6 +211,8 @@ module mist_core(
     .op_a_d_i              ( op_a             [d] ),
     .op_b_d_i              ( op_b             [d] ),
 
+    .gpr_rs1_addr_d_i      ( gpr_rs1_addr     [d] ),
+    .gpr_rs2_addr_d_i      ( gpr_rs2_addr     [d] ),
     .gpr_wa_d_i            ( gpr_wa           [d] ),
     .gpr_we_d_i            ( gpr_we           [d] ),
 
@@ -243,7 +249,11 @@ module mist_core(
     .hu_frw_op_b_i         ( hu_op_b          [e] ),
 
     // To Hazard Unit
+    .hu_rs1_addr_e_o       ( hu_rs1_addr      [e] ),
+    .hu_rs2_addr_e_o       ( hu_rs2_addr      [e] ),
     .hu_flush_req_e_o      ( hu_flush_req     [e] ),
+    .hu_rd_addr_e_o        ( hu_rd_addr       [e] ),
+    .hu_frw_result_e_o     ( hu_frw_result    [e] ),
 
     // To fetch stage
     .alu_flag_e_o          ( alu_flag         [e] ),
@@ -252,9 +262,6 @@ module mist_core(
     .jal_e_o               ( jal              [e] ),
     .offset_bj_pc_e_o      ( offset_bj_pc     [e] ),
     .offset_jr_pc_e_o      ( offset_jr_pc     [e] ),
-
-    .hu_rd_addr_e_o        ( hu_rd_addr       [e] ),
-    .hu_frw_result_e_o     ( hu_frw_result    [e] ),
 
     // To memory stage
     .alu_result_e_o        ( alu_result       [e] ),
@@ -346,6 +353,8 @@ module mist_core(
     .hu_opcode_d_i         ( opcode           [d] ),
 
     // From execute stage
+    .hu_rs1_addr_e_i       ( hu_rs1_addr      [e] ),
+    .hu_rs2_addr_e_i       ( hu_rs2_addr      [e] ),
     .hu_rd_addr_e_i        ( hu_rd_addr       [e] ),
     .hu_frw_result_e_i     ( hu_frw_result    [e] ),
     .hu_opcode_e_i         ( opcode           [e] ),

@@ -42,6 +42,8 @@ module mist_decode_stage(
   output logic [31:0] op_a_d_o,
   output logic [31:0] op_b_d_o,
 
+  output logic [4:0]  gpr_rs1_addr_d_o,
+  output logic [4:0]  gpr_rs2_addr_d_o,
   output logic [4:0]  gpr_wa_d_o,
   output logic        gpr_we_d_o,
 
@@ -163,22 +165,22 @@ module mist_decode_stage(
   );
 
   // Register File logic
-  logic [4:0]  gpr_rd_addr1;
-  logic [4:0]  gpr_rd_addr2;
+  logic [4:0]  gpr_rs1_addr;
+  logic [4:0]  gpr_rs2_addr;
 
   logic [4:0]  gpr_wr_addr;
 
   logic [31:0] gpr_rd_data1;
   logic [31:0] gpr_rd_data2;
 
-  assign gpr_rd_addr1    = instr_f_i[19:15];
-  assign gpr_rd_addr2    = instr_f_i[24:20];
+  assign gpr_rs1_addr    = instr_f_i[19:15];
+  assign gpr_rs2_addr    = instr_f_i[24:20];
 
   assign gpr_wr_addr     = instr_f_i[11:7];
 
   // To Hazard Unit
-  assign hu_rs1_addr_d_o = gpr_rd_addr1;
-  assign hu_rs2_addr_d_o = gpr_rd_addr2;
+  assign hu_rs1_addr_d_o = gpr_rs1_addr;
+  assign hu_rs2_addr_d_o = gpr_rs2_addr;
 
   mist_gpr d_gpr (
     .clk_i      ( clk_i         ),
@@ -189,8 +191,8 @@ module mist_decode_stage(
     .wr_addr1_i ( gpr_wa_wb_i   ),
     .wr_addr2_i ( hu_gpr_wa_d_i ),
 
-    .rd_addr1_i ( gpr_rd_addr1  ),
-    .rd_addr2_i ( gpr_rd_addr2  ),
+    .rd_addr1_i ( gpr_rs1_addr  ),
+    .rd_addr2_i ( gpr_rs2_addr  ),
 
     .wr_data1_i ( gpr_wd_wb_i   ),
     .wr_data2_i ( hu_gpr_wd_d_i ),
@@ -224,73 +226,79 @@ module mist_decode_stage(
   // To execute stage
   always_ff @( posedge clk_i ) begin
     if( !rstn_i ) begin
-      imm_b_d_o     <= 32'd0;
-      imm_j_d_o     <= 32'd0;
-      gpr_wa_d_o    <= 5'd0;
-      gpr_we_d_o    <= 1'd0;
-      ill_instr_d_o <= 1'd0;
-      pd_opcode_d_o <= 7'd0;
-      csr_op_d_o    <= 3'd0;
-      csr_we_d_o    <= 1'd0;
-      branch_d_o    <= 1'd0;
-      jalr_d_o      <= 1'd0;
-      jal_d_o       <= 1'd0;
-      lsu_req_d_o   <= 1'd0;
-      lsu_we_d_o    <= 1'd0;
-      lsu_size_d_o  <= 3'd0;
-      lsu_wd_d_o    <= 32'd0;
-      alu_op_d_o    <= 4'd0;
-      mret_d_o      <= 1'd0;
-      wb_sel_d_o    <= 2'd0;
-      op_a_d_o      <= 32'd0;
-      op_b_d_o      <= 32'd0;
-      pc_cur_d_o    <= 32'd0;
+      imm_b_d_o        <= 32'd0;
+      imm_j_d_o        <= 32'd0;
+      gpr_rs1_addr_d_o <= 5'd0;
+      gpr_rs2_addr_d_o <= 5'd0;
+      gpr_wa_d_o       <= 5'd0;
+      gpr_we_d_o       <= 1'd0;
+      ill_instr_d_o    <= 1'd0;
+      pd_opcode_d_o    <= 7'd0;
+      csr_op_d_o       <= 3'd0;
+      csr_we_d_o       <= 1'd0;
+      branch_d_o       <= 1'd0;
+      jalr_d_o         <= 1'd0;
+      jal_d_o          <= 1'd0;
+      lsu_req_d_o      <= 1'd0;
+      lsu_we_d_o       <= 1'd0;
+      lsu_size_d_o     <= 3'd0;
+      lsu_wd_d_o       <= 32'd0;
+      alu_op_d_o       <= 4'd0;
+      mret_d_o         <= 1'd0;
+      wb_sel_d_o       <= 2'd0;
+      op_a_d_o         <= 32'd0;
+      op_b_d_o         <= 32'd0;
+      pc_cur_d_o       <= 32'd0;
     end
     else if( hu_flush_d_i ) begin
-      imm_b_d_o     <= 32'd0;
-      imm_j_d_o     <= 32'd0;
-      gpr_wa_d_o    <= 5'd0;
-      gpr_we_d_o    <= 1'd0;
-      ill_instr_d_o <= 1'd0;
-      pd_opcode_d_o <= 7'd0;
-      csr_op_d_o    <= 3'd0;
-      csr_we_d_o    <= 1'd0;
-      branch_d_o    <= 1'd0;
-      jalr_d_o      <= 1'd0;
-      jal_d_o       <= 1'd0;
-      lsu_req_d_o   <= 1'd0;
-      lsu_we_d_o    <= 1'd0;
-      lsu_size_d_o  <= 3'd0;
-      lsu_wd_d_o    <= 32'd0;
-      alu_op_d_o    <= 4'd0;
-      mret_d_o      <= 1'd0;
-      wb_sel_d_o    <= 2'd0;
-      op_a_d_o      <= 32'd0;
-      op_b_d_o      <= 32'd0;
-      pc_cur_d_o    <= 32'd0;
+      imm_b_d_o        <= 32'd0;
+      imm_j_d_o        <= 32'd0;
+      gpr_rs1_addr_d_o <= 5'd0;
+      gpr_rs2_addr_d_o <= 5'd0;
+      gpr_wa_d_o       <= 5'd0;
+      gpr_we_d_o       <= 1'd0;
+      ill_instr_d_o    <= 1'd0;
+      pd_opcode_d_o    <= 7'd0;
+      csr_op_d_o       <= 3'd0;
+      csr_we_d_o       <= 1'd0;
+      branch_d_o       <= 1'd0;
+      jalr_d_o         <= 1'd0;
+      jal_d_o          <= 1'd0;
+      lsu_req_d_o      <= 1'd0;
+      lsu_we_d_o       <= 1'd0;
+      lsu_size_d_o     <= 3'd0;
+      lsu_wd_d_o       <= 32'd0;
+      alu_op_d_o       <= 4'd0;
+      mret_d_o         <= 1'd0;
+      wb_sel_d_o       <= 2'd0;
+      op_a_d_o         <= 32'd0;
+      op_b_d_o         <= 32'd0;
+      pc_cur_d_o       <= 32'd0;
     end
     else if( !hu_stall_d_i ) begin
-      imm_b_d_o     <= imm_b;
-      imm_j_d_o     <= imm_j;
-      gpr_wa_d_o    <= gpr_wr_addr;
-      gpr_we_d_o    <= d_gpr_we;
-      ill_instr_d_o <= ill_instr;
-      pd_opcode_d_o <= pd_opcode_f_i;
-      csr_op_d_o    <= csr_op;
-      csr_we_d_o    <= csr_we;
-      branch_d_o    <= branch;
-      jalr_d_o      <= jalr;
-      jal_d_o       <= jal;
-      lsu_req_d_o   <= lsu_req;
-      lsu_we_d_o    <= lsu_we;
-      lsu_size_d_o  <= lsu_size;
-      lsu_wd_d_o    <= gpr_rd_data2;
-      alu_op_d_o    <= alu_op;
-      mret_d_o      <= mret;
-      wb_sel_d_o    <= wb_sel;
-      op_a_d_o      <= op_a;
-      op_b_d_o      <= op_b;
-      pc_cur_d_o    <= pc_cur_f_i;
+      imm_b_d_o        <= imm_b;
+      imm_j_d_o        <= imm_j;
+      gpr_rs1_addr_d_o <= gpr_rs1_addr;
+      gpr_rs2_addr_d_o <= gpr_rs2_addr;
+      gpr_wa_d_o       <= gpr_wr_addr;
+      gpr_we_d_o       <= d_gpr_we;
+      ill_instr_d_o    <= ill_instr;
+      pd_opcode_d_o    <= pd_opcode_f_i;
+      csr_op_d_o       <= csr_op;
+      csr_we_d_o       <= csr_we;
+      branch_d_o       <= branch;
+      jalr_d_o         <= jalr;
+      jal_d_o          <= jal;
+      lsu_req_d_o      <= lsu_req;
+      lsu_we_d_o       <= lsu_we;
+      lsu_size_d_o     <= lsu_size;
+      lsu_wd_d_o       <= gpr_rd_data2;
+      alu_op_d_o       <= alu_op;
+      mret_d_o         <= mret;
+      wb_sel_d_o       <= wb_sel;
+      op_a_d_o         <= op_a;
+      op_b_d_o         <= op_b;
+      pc_cur_d_o       <= pc_cur_f_i;
     end
   end
 

@@ -9,6 +9,8 @@ module mist_execute_stage(
   input  logic [31:0] op_a_d_i,
   input  logic [31:0] op_b_d_i,
 
+  input  logic [4:0]  gpr_rs1_addr_d_i,
+  input  logic [4:0]  gpr_rs2_addr_d_i,
   input  logic [4:0]  gpr_wa_d_i,
   input  logic        gpr_we_d_i,
 
@@ -47,6 +49,8 @@ module mist_execute_stage(
   // To Hazard Unit
   output logic        hu_flush_req_e_o,
 
+  output logic [4:0]  hu_rs1_addr_e_o,
+  output logic [4:0]  hu_rs2_addr_e_o,
   output logic [4:0]  hu_rd_addr_e_o,
   output logic [31:0] hu_frw_result_e_o,
 
@@ -109,6 +113,8 @@ module mist_execute_stage(
                                          ( 32'd0                   );
 
   // To Hazard Unit
+  assign hu_rs1_addr_e_o   = gpr_rs1_addr_d_i;
+  assign hu_rs2_addr_e_o   = gpr_rs2_addr_d_i;
   assign hu_rd_addr_e_o    = gpr_wa_d_i;
   assign hu_frw_result_e_o = alu_result;
 
