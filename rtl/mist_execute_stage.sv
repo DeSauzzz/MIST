@@ -59,8 +59,7 @@ module mist_execute_stage(
   output logic        branch_e_o,
   output logic        jalr_e_o,
   output logic        jal_e_o,
-  output logic [31:0] offset_bj_pc_e_o, // Branch and JAL offset
-  output logic [31:0] offset_jr_pc_e_o, // JALR offset
+  output logic [31:0] offset_pc_e_o,
 
   // To memory stage
   output logic [31:0] alu_result_e_o,
@@ -102,15 +101,19 @@ module mist_execute_stage(
     .result_o ( alu_result )
   );
 
-  // Offset's logic
-  logic [31:0] offset_bj_pc;
-  logic [31:0] offset_jr_pc;
+  // Offset generator
+  logic [31:0] offset_pc;
 
-  assign offset_bj_pc = ( branch_d_i ) ? ( pc_cur_d_i + imm_b_d_i  ):
-                        ( jal_d_i    ) ? ( pc_cur_d_i + imm_j_d_i  ):
-                                         ( 32'd0                   );
-  assign offset_jr_pc = ( jalr_d_i   ) ? ( pc_cur_d_i + alu_result ):
-                                         ( 32'd0                   );
+  assign offset_pc = ( branch_d_i ) ? ( pc_cur_d_i + imm_b_d_i  ):
+                     ( jal_d_i    ) ? ( pc_cur_d_i + imm_j_d_i  ):
+                     ( jalr_d_i   ) ? ( pc_cur_d_i + alu_result ):
+                                      ( 32'd0                   );
+
+  assign offset_pc_e_o = offset_pc;
+  assign branch_e_o    = branch_d_i;
+  assign jalr_e_o      = jalr_d_i;
+  assign jal_e_o       = jal_d_i;
+  assign alu_flag_e_o  = alu_flag;
 
   // To Hazard Unit
   assign hu_rs1_addr_e_o   = gpr_rs1_addr_d_i;
@@ -122,7 +125,7 @@ module mist_execute_stage(
 
   always_comb begin
     hu_flush_req = 1'd0;
-    if( ( jalr_d_i   ) || ( jal_d_i ) )
+    if( ( jalr_d_i ) || ( jal_d_i ) )
       hu_flush_req = 1'd1;
     else if( ( branch_d_i ) && ( alu_flag ) )
       hu_flush_req = 1'd1;
@@ -134,12 +137,6 @@ module mist_execute_stage(
   always_ff @( posedge clk_i ) begin
     if( !rstn_i ) begin
       alu_result_e_o    <= 32'd0;
-      alu_flag_e_o      <= 1'd0;
-      offset_bj_pc_e_o  <= 32'd0;
-      offset_jr_pc_e_o  <= 32'd0;
-      branch_e_o        <= 1'd0;
-      jalr_e_o          <= 1'd0;
-      jal_e_o           <= 1'd0;
       gpr_wa_e_o        <= 5'd0;
       ill_instr_e_o     <= 1'd0;
       pd_opcode_e_o     <= 7'd0;
@@ -155,12 +152,6 @@ module mist_execute_stage(
     end
     else if( hu_flush_e_i ) begin
       alu_result_e_o    <= 32'd0;
-      alu_flag_e_o      <= 1'd0;
-      offset_bj_pc_e_o  <= 32'd0;
-      offset_jr_pc_e_o  <= 32'd0;
-      branch_e_o        <= 1'd0;
-      jalr_e_o          <= 1'd0;
-      jal_e_o           <= 1'd0;
       gpr_wa_e_o        <= 5'd0;
       ill_instr_e_o     <= 1'd0;
       pd_opcode_e_o     <= 7'd0;
@@ -176,12 +167,6 @@ module mist_execute_stage(
     end
     else if( !hu_stall_e_i ) begin
       alu_result_e_o    <= alu_result;
-      alu_flag_e_o      <= alu_flag;
-      offset_bj_pc_e_o  <= offset_bj_pc;
-      offset_jr_pc_e_o  <= offset_jr_pc;
-      branch_e_o        <= branch_d_i;
-      jalr_e_o          <= jalr_d_i;
-      jal_e_o           <= jal_d_i;
       gpr_wa_e_o        <= gpr_wa_d_i;
       ill_instr_e_o     <= ill_instr_d_i;
       pd_opcode_e_o     <= pd_opcode_d_i;

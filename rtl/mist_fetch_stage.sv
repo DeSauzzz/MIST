@@ -9,8 +9,7 @@ module mist_fetch_stage #(
   input  logic        branch_e_i,
   input  logic        jalr_e_i,
   input  logic        jal_e_i,
-  input  logic [31:0] offset_bj_pc_e_i,
-  input  logic [31:0] offset_jr_pc_e_i,
+  input  logic [31:0] offset_pc_e_i,
 
   // From Hazard Unit
   input  logic        hu_stall_f_i,
@@ -38,19 +37,16 @@ module mist_fetch_stage #(
       pc_cur <= pc_nxt;
   end
 
-  assign pc_nxt = ( ( jalr_e_i )                                  ) ? ( offset_jr_pc_e_i ):
-                  ( ( branch_e_i && alu_flag_e_i ) || ( jal_e_i ) ) ? ( offset_bj_pc_e_i ):
-                                                                      ( pc_cur + 32'd4   );
+  assign pc_nxt = ( ( jalr_e_i ) || ( jal_e_i ) || ( branch_e_i && alu_flag_e_i ) ) ? ( offset_pc_e_i  ):
+                                                                                      ( pc_cur + 32'd4 );
 
   always_ff @( posedge clk_i ) begin
     if( !rstn_i ) begin
       instr_f_o  <= 32'd0;
       pc_cur_f_o <= 32'd0;
     end
-    else if( hu_flush_f_i ) begin
+    else if( hu_flush_f_i )
       instr_f_o  <= 32'd0;
-      pc_cur_f_o <= 32'd0;
-    end
     else if( !hu_stall_f_i ) begin
       instr_f_o  <= instr_cur;
       pc_cur_f_o <= pc_cur;

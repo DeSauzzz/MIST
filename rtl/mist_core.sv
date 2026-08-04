@@ -46,8 +46,7 @@ module mist_core(
   logic        jalr              [d:e];
   logic        jal               [d:e];
 
-  logic [31:0] offset_bj_pc      [e:e];
-  logic [31:0] offset_jr_pc      [e:e];
+  logic [31:0] offset_pc         [e:e];
 
   logic [31:0] imm_b             [d:d];
   logic [31:0] imm_j             [d:d];
@@ -121,8 +120,7 @@ module mist_core(
     .branch_e_i            ( branch           [e] ),
     .jalr_e_i              ( jalr             [e] ),
     .jal_e_i               ( jal              [e] ),
-    .offset_bj_pc_e_i      ( offset_bj_pc     [e] ),
-    .offset_jr_pc_e_i      ( offset_jr_pc     [e] ),
+    .offset_pc_e_i         ( offset_pc        [e] ),
 
     // From Hazard Unit
     .hu_stall_f_i          ( hu_stall         [f] ),
@@ -260,8 +258,7 @@ module mist_core(
     .branch_e_o            ( branch           [e] ),
     .jalr_e_o              ( jalr             [e] ),
     .jal_e_o               ( jal              [e] ),
-    .offset_bj_pc_e_o      ( offset_bj_pc     [e] ),
-    .offset_jr_pc_e_o      ( offset_jr_pc     [e] ),
+    .offset_pc_e_o         ( offset_pc        [e] ),
 
     // To memory stage
     .alu_result_e_o        ( alu_result       [e] ),
