@@ -29,6 +29,10 @@ bin2hex:
 	sed 's/\(..\)\(..\)\(..\)\(..\)/\4\3\2\1/' > $(STARTDIR)/build/$(TARGET).dat && \
 	mv $(STARTDIR)/build/$(TARGET).dat $(STARTDIR)/mem_files
 
+spike-sim:
+	@cd build && \
+	spike -l --isa=$(ISA) $(TARGET).elf
+
 clean:
 	rm -rf $(STARTDIR)/build && \
 	rm -rf $(STARTDIR)/mem_files
