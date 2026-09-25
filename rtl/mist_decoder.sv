@@ -81,14 +81,7 @@ module mist_decoder(
 
   // CSR's logic
   assign csr_we_o    = ( opcode == SYSTEM_OPCODE ) && !( ill_instr ) && ( instr_i != mret );
-  assign csr_op_o    = ( ( opcode == SYSTEM_OPCODE ) && !( ill_instr ) ) ? ( ( funct3 == 3'b001 ) ? ( CSR_RW     ):
-                                                                             ( funct3 == 3'b010 ) ? ( CSR_RS     ):
-                                                                             ( funct3 == 3'b011 ) ? ( CSR_RC     ):
-                                                                             ( funct3 == 3'b101 ) ? ( CSR_RW_IMM ):
-                                                                             ( funct3 == 3'b110 ) ? ( CSR_RS_IMM ):
-                                                                             ( funct3 == 3'b111 ) ? ( CSR_RC_IMM ):
-                                                                                                    ( CSR_ILL    )
-                                                                           ) : ( CSR_ILL );
+  assign csr_op_o    = ( ( opcode == SYSTEM_OPCODE ) && !( ill_instr ) ) ? ( funct3 ) : ( CSR_ILL );
 
   // Branch logic
   assign branch_o    = ( opcode == BRANCH_OPCODE ) && !( ill_instr );
