@@ -46,12 +46,15 @@ module mist_data_mem(
 
   // Memory logic
   logic [31:0] mem_rd_ff;
+  logic [31:0] mem_addr_sh;
+
+  assign mem_addr_sh = ( mem_addr_i[31:0] >> 2 );
 
   always_ff @( posedge clk_i ) begin
     if( ( mem_req_i ) && !( mem_we_i ) )
-      mem_rd_ff <= memory[mem_addr_i];
+      mem_rd_ff <= memory[mem_addr_sh];
     else if( ( mem_req_i ) && ( mem_we_i ) )
-      memory[mem_addr_i] <= wr_data;
+      memory[mem_addr_sh] <= wr_data;
   end
 
   assign mem_ack_o   = mem_ack_ff;
