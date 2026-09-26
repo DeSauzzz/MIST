@@ -22,6 +22,7 @@ module mist_lsu(
   input  logic        mem_ack_i,
 
   // Control and status signals
+  input  logic        lsu_trap_i,
   output logic        lsu_stall_req_o
 );
 
@@ -33,9 +34,9 @@ module mist_lsu(
 
   logic [31:0] lsu_rd_ff;
 
-  assign mem_req_o       = ( lsu_req_i ) && ( state_lsu == LSU_MEM_S ) &&
+  assign mem_req_o       = ( lsu_req_i ) && !( lsu_trap_i ) && ( state_lsu == LSU_MEM_S ) &&
                            ( lsu_size_i inside { MEM_BYTE, MEM_HALF, MEM_WORD, MEM_BYTE_U, MEM_HALF_U } );
-  assign mem_we_o        = ( lsu_we_i   );
+  assign mem_we_o        = ( lsu_we_i  ) && !( lsu_trap_i );
   assign mem_addr_o      = { lsu_addr_i[31:2], 2'b00 };
 
   assign lsu_stall_req_o = ( lsu_req_i ) && ( state_lsu != LSU_ACK_S );
