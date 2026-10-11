@@ -14,7 +14,6 @@ module mist_decode_stage(
 
   // From fetch stage
   input  logic [31:0] instr_f_i,
-  input  logic [6: 0] pd_opcode_f_i,
   input  logic [31:0] pc_cur_f_i,
 
   // From wb stage
@@ -23,17 +22,24 @@ module mist_decode_stage(
   input  logic        gpr_we_wb_i,
 
   // From Hazard Unit
-  input  logic [31:0] hu_gpr_wd_d_i,
-  input  logic [4:0]  hu_gpr_wa_d_i,
-  input  logic        hu_gpr_we_d_i,
-  input  logic        hu_raw_solve_d_i,
-
   input  logic        hu_stall_d_i,
   input  logic        hu_flush_d_i,
 
+  input  logic        hu_solver_d_i,
+  input  logic        hu_op_byp_d_i,
+  input  logic [31:0] hu_data_byp_d_i,
+
   // To Hazard Unit
-  output logic [4:0]  hu_rs1_addr_d_o,
-  output logic [4:0]  hu_rs2_addr_d_o,
+  output logic [4:0]  hu_rs1_d_o,
+  output logic [4:0]  hu_rs2_d_o,
+
+  output logic [4:0]  hu_opcode_d_o,
+
+  output logic [1:0]  hu_op_a_sel_d_o,
+  output logic [2:0]  hu_op_b_sel_d_o,
+
+  output logic        hu_use_rs1_d_o,
+  output logic        hu_use_rs2_d_o,
 
   // To execute stage
   output logic [31:0] imm_b_d_o,
@@ -48,7 +54,8 @@ module mist_decode_stage(
   output logic        gpr_we_d_o,
 
   output logic        ill_instr_d_o,
-  output logic [6:0]  pd_opcode_d_o,
+  output logic        use_rs1_d_o,
+  output logic        use_rs2_d_o,
 
   output logic [2:0]  csr_op_d_o,
   output logic        csr_we_d_o,
@@ -119,6 +126,8 @@ module mist_decode_stage(
 
   // Decoder logic
   logic        ill_instr;
+  logic        use_rs1;
+  logic        use_rs2;
 
   logic [2:0]  csr_op;
   logic        csr_we;
@@ -143,6 +152,8 @@ module mist_decode_stage(
     .instr_i        ( instr_f_i    ),
 
     .ill_instr_o    ( ill_instr    ),
+    .use_rs1_o      ( use_rs1      ),
+    .use_rs2_o      ( use_rs2      ),
 
     .csr_op_o       ( csr_op       ),
     .csr_we_o       ( csr_we       ),
@@ -178,28 +189,31 @@ module mist_decode_stage(
 
   assign gpr_wr_addr     = instr_f_i[11:7];
 
-  // To Hazard Unit
-  assign hu_rs1_addr_d_o = gpr_rs1_addr;
-  assign hu_rs2_addr_d_o = gpr_rs2_addr;
-
   mist_gpr d_gpr (
     .clk_i      ( clk_i         ),
 
-    .wr_en1_i   ( gpr_we_wb_i   ),
-    .wr_en2_i   ( hu_gpr_we_d_i ),
+    .wr_en_i    ( gpr_we_wb_i   ),
 
-    .wr_addr1_i ( gpr_wa_wb_i   ),
-    .wr_addr2_i ( hu_gpr_wa_d_i ),
+    .wr_addr_i  ( gpr_wa_wb_i   ),
 
     .rd_addr1_i ( gpr_rs1_addr  ),
     .rd_addr2_i ( gpr_rs2_addr  ),
 
-    .wr_data1_i ( gpr_wd_wb_i   ),
-    .wr_data2_i ( hu_gpr_wd_d_i ),
+    .wr_data_i  ( gpr_wd_wb_i   ),
 
     .rd_data1_o ( gpr_rd_data1  ),
     .rd_data2_o ( gpr_rd_data2  )
   );
+
+  // To Hazard Unit
+  assign hu_rs1_d_o      = gpr_rs1_addr;
+  assign hu_rs2_d_o      = gpr_rs2_addr;
+
+  assign hu_op_a_sel_d_o = alu_op_a_sel;
+  assign hu_op_b_sel_d_o = alu_op_b_sel;
+
+  assign hu_use_rs1_d_o  = use_rs1;
+  assign hu_use_rs2_d_o  = use_rs2;
 
   // Operand selection logic
   logic [31:0] op_a;
@@ -207,7 +221,7 @@ module mist_decode_stage(
 
   always_comb begin
     case( alu_op_a_sel )
-      OP_A_RS1:     op_a = gpr_rd_data1;
+      OP_A_RS1:     op_a = ( ( hu_solver_d_i ) && !( hu_op_byp_d_i ) ) ? ( hu_data_byp_d_i ) : ( gpr_rd_data1 );
       OP_A_CURR_PC: op_a = pc_cur_f_i;
       default:      op_a = 32'd0;
     endcase
@@ -215,7 +229,7 @@ module mist_decode_stage(
 
   always_comb begin
     case( alu_op_b_sel )
-      OP_B_RS2:   op_b = gpr_rd_data2;
+      OP_B_RS2:   op_b = ( ( hu_solver_d_i ) && ( hu_op_byp_d_i ) ) ? ( hu_data_byp_d_i ) : ( gpr_rd_data2 );
       OP_B_INCR:  op_b = 32'd4;
       OP_B_IMM_I: op_b = imm_i;
       OP_B_IMM_U: op_b = imm_u;
@@ -233,7 +247,8 @@ module mist_decode_stage(
       gpr_wa_d_o       <= 5'd0;
       gpr_we_d_o       <= 1'd0;
       ill_instr_d_o    <= 1'd0;
-      pd_opcode_d_o    <= 7'd0;
+      use_rs1_d_o      <= 1'd0;
+      use_rs2_d_o      <= 1'd0;
       csr_op_d_o       <= 3'd0;
       csr_we_d_o       <= 1'd0;
       branch_d_o       <= 1'd0;
@@ -258,7 +273,8 @@ module mist_decode_stage(
       gpr_wa_d_o       <= 5'd0;
       gpr_we_d_o       <= 1'd0;
       ill_instr_d_o    <= 1'd0;
-      pd_opcode_d_o    <= 7'd0;
+      use_rs1_d_o      <= 1'd0;
+      use_rs2_d_o      <= 1'd0;
       csr_op_d_o       <= 3'd0;
       csr_we_d_o       <= 1'd0;
       branch_d_o       <= 1'd0;
@@ -283,7 +299,8 @@ module mist_decode_stage(
       gpr_wa_d_o       <= gpr_wr_addr;
       gpr_we_d_o       <= d_gpr_we;
       ill_instr_d_o    <= ill_instr;
-      pd_opcode_d_o    <= pd_opcode_f_i;
+      use_rs1_d_o      <= use_rs1;
+      use_rs2_d_o      <= use_rs2;
       csr_op_d_o       <= csr_op;
       csr_we_d_o       <= csr_we;
       branch_d_o       <= branch;

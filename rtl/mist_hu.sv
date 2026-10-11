@@ -1,42 +1,61 @@
+// Operand A selector
+import mist_alu_pkg::OP_A_RS1;
+import mist_alu_pkg::OP_A_CURR_PC;
+import mist_alu_pkg::OP_A_ZERO;
+
+// Operand B selector
+import mist_alu_pkg::OP_B_RS2;
+import mist_alu_pkg::OP_B_INCR;
+import mist_alu_pkg::OP_B_IMM_I;
+import mist_alu_pkg::OP_B_IMM_U;
+import mist_alu_pkg::OP_B_IMM_S;
+
+// Opcode check
 import mist_decoder_pkg::*;
 
 module mist_hu(
   input  logic        clk_i,
   input  logic        rstn_i,
 
-  // From fetch stage
-  input  logic [4:0]  hu_rs1_addr_f_i,
-  input  logic [4:0]  hu_rs2_addr_f_i,
-  input  logic [6:0]  hu_opcode_f_i,
+  // From Decode stage
+  input  logic [4:0]  hu_rs1_d_i,
+  input  logic [4:0]  hu_rs2_d_i,
 
-  // From decode stage
-  input  logic [4:0]  hu_rs1_addr_d_i,
-  input  logic [4:0]  hu_rs2_addr_d_i,
-  input  logic [6:0]  hu_opcode_d_i,
+  input  logic [1:0]  hu_op_a_sel_d_i,
+  input  logic [2:0]  hu_op_b_sel_d_i,
 
-  // From execute stage
-  input  logic [4:0]  hu_rs1_addr_e_i,
-  input  logic [4:0]  hu_rs2_addr_e_i,
-  input  logic [4:0]  hu_rd_addr_e_i,
-  input  logic [31:0] hu_frw_result_e_i,
-  input  logic [6:0]  hu_opcode_e_i,
+  input  logic        hu_use_rs1_d_i,
+  input  logic        hu_use_rs2_d_i,
 
-  // From memory stage
-  input  logic [4:0]  hu_rd_addr_m_i,
-  input  logic [31:0] hu_frw_result_m_i,
-  input  logic [6:0]  hu_opcode_m_i,
+  // From Execute stage
+  input  logic [4:0]  hu_rs1_e_i,
+  input  logic [4:0]  hu_rs2_e_i,
+
+  input  logic        hu_use_rs1_e_i,
+  input  logic        hu_use_rs2_e_i,
+
+  // From Memory stage
+  input  logic [31:0] hu_comp_res_m_i,
+  input  logic [31:0] hu_mem_data_m_i,
+  input  logic [4:0]  hu_wa_m_i,
+  input  logic        hu_mem_req_m_i,
+  input  logic        hu_mem_we_m_i,
+  input  logic        hu_gpr_we_m_i,
+
+  // From Writeback stage
+  input  logic [31:0] hu_wb_data_wb_i,
+  input  logic [4:0]  hu_wa_wb_i,
+  input  logic        hu_gpr_we_wb_i,
 
   // To decode stage
-  output logic        hu_raw_solve_d_o,
-  output logic        hu_gpr_we_d_o,
-  output logic [4:0]  hu_gpr_wa_d_o,
-  output logic [31:0] hu_gpr_wd_d_o,
+  output logic        hu_solver_d_o,
+  output logic        hu_op_byp_d_o,   // 0 - bypass data to RD1 register; 1 - bypass data to RD2 register
+  output logic [31:0] hu_data_byp_d_o,
 
   // To execute stage
-  output logic        hu_raw_rs1_solve_e_o,
-  output logic        hu_raw_rs2_solve_e_o,
-  output logic [31:0] hu_op_a_e_o,
-  output logic [31:0] hu_op_b_e_o,
+  output logic        hu_solver_e_o,
+  output logic        hu_op_byp_e_o,   // 0 - bypass data to a operand; 1 - bypass data to b operand
+  output logic [31:0] hu_data_byp_e_o,
 
   // Control signals
   input  logic        hu_stall_req_f_i,
@@ -60,90 +79,83 @@ module mist_hu(
   output logic        hu_flush_m_o
 );
 
+  // Stall and Flush logic
   logic  stall_req;
-  assign stall_req    = ( hu_stall_req_f_i ) || ( hu_stall_req_d_i ) || ( hu_stall_req_e_i ) || ( hu_stall_req_m_i );
+  assign stall_req = ( hu_stall_req_f_i ) || ( hu_stall_req_d_i ) || ( hu_stall_req_e_i ) || ( hu_stall_req_m_i );
 
   assign hu_stall_f_o = stall_req;
   assign hu_stall_d_o = stall_req;
   assign hu_stall_e_o = stall_req;
   assign hu_stall_m_o = stall_req;
 
-  assign hu_flush_f_o = ( hu_flush_req_e_i );
-  assign hu_flush_d_o = ( hu_flush_req_e_i );
+  assign hu_flush_f_o = hu_flush_req_e_i;
+  assign hu_flush_d_o = hu_flush_req_e_i;
   assign hu_flush_e_o = 1'd0;
   assign hu_flush_m_o = 1'd0;
 
-  // Function for resolving conflicts detected at the decode stage
-  function automatic logic d_hazard_detector(
-    input logic [4:0] rd_addr,
-    input logic [4:0] rs1_addr,
-    input logic [4:0] rs2_addr,
-    input logic [6:0] opcode_req,
-    input logic [6:0] opcode_resp
-  );
-    case( opcode_req )
-      { OP_OPCODE,     2'b11 },
-      { STORE_OPCODE,  2'b11 },
-      { BRANCH_OPCODE, 2'b11 }: d_hazard_detector = ( ( rd_addr == rs1_addr ) || ( rd_addr == rs2_addr ) ) && ( rd_addr != 5'd0 ) &&
-                                                   !( opcode_resp[6:2] inside { BRANCH_OPCODE, STORE_OPCODE } );
-      { IMM_OPCODE,    2'b11 },
-      { JALR_OPCODE,   2'b11 },
-      { LOAD_OPCODE,   2'b11 }: d_hazard_detector = ( rd_addr == rs1_addr ) && ( rd_addr != 5'd0 ) &&
-                                                   !( opcode_resp[6:2] inside { BRANCH_OPCODE, STORE_OPCODE } );
-      default:                  d_hazard_detector = 1'd0;
-    endcase
-  endfunction
+  // Delay for op_*_sel
+  logic [1:0] op_a_sel_d_dly_ff;
+  logic [2:0] op_b_sel_d_dly_ff;
 
-  // D -> M Conflict detection
-  logic  detect_dm_hazard;
-  assign detect_dm_hazard = d_hazard_detector( hu_rd_addr_e_i, hu_rs1_addr_f_i, hu_rs2_addr_f_i, hu_opcode_f_i, hu_opcode_e_i );
+  always_ff @( posedge clk_i ) begin
+    if( !rstn_i )
+      op_a_sel_d_dly_ff <= 2'd0;
+    else if( !stall_req )
+      op_a_sel_d_dly_ff <= hu_op_a_sel_d_i;
+  end
 
-  // D -> W Conflict detection
-  logic  detect_dw_hazard;
-  assign detect_dw_hazard = d_hazard_detector( hu_rd_addr_m_i, hu_rs1_addr_f_i, hu_rs2_addr_f_i, hu_opcode_f_i, hu_opcode_m_i );
+  always_ff @( posedge clk_i ) begin
+    if( !rstn_i )
+      op_b_sel_d_dly_ff <= 3'd0;
+    else if( !stall_req )
+      op_b_sel_d_dly_ff <= hu_op_b_sel_d_i;
+  end
 
-  // Informing the decode stage about the conflict resolution
-  assign hu_raw_solve_d_o = ( detect_dm_hazard ) || ( detect_dw_hazard );
-  assign hu_gpr_we_d_o    = ( detect_dm_hazard ) || ( detect_dw_hazard );
-  assign hu_gpr_wa_d_o    = ( detect_dm_hazard ) ?  ( hu_rd_addr_e_i      ) :
-                            ( detect_dw_hazard ) ?  ( hu_rd_addr_m_i      ) : ( 5'd0  );
-  assign hu_gpr_wd_d_o    = ( detect_dm_hazard ) ?  ( hu_frw_result_e_i   ) :
-                            ( detect_dw_hazard ) ?  ( hu_frw_result_m_i   ) : ( 32'd0 );
+  // Hazard identification
+  logic  hu_em_mem_raw;  // Potential memory operation RAW hazard between execute and memory stages
+  logic  hu_em_comp_raw; // Potential computing operation RAW hazard between execute and memory stages
+  logic  hu_ewb_raw;     // Potential RAW hazard between execute and writeback stages
+  logic  hu_dwb_raw;     // Potential RAW hazard between decode and writeback stages
 
-  // E -> M Conflict detection
-  function automatic logic e_hazard_detector_rs1(
-    input logic [4:0] rd_addr,
-    input logic [4:0] rs1_addr,
-    input logic [6:0] opcode
-  );
-    case( opcode )
-      { OP_OPCODE,     2'b11 },
-      { STORE_OPCODE,  2'b11 },
-      { BRANCH_OPCODE, 2'b11 },
-      { IMM_OPCODE,    2'b11 },
-      { JALR_OPCODE,   2'b11 },
-      { LOAD_OPCODE,   2'b11 }: e_hazard_detector_rs1 = ( rd_addr == rs1_addr ) && ( rd_addr != 5'd0 );
-      default:                  e_hazard_detector_rs1 = 1'd0;
-    endcase
-  endfunction
+  assign hu_em_mem_raw    = ( ( ( hu_wa_m_i == hu_rs1_e_i )  &&  ( hu_wa_m_i != 5'd0 ) && ( hu_use_rs1_e_i ) ) && ( op_a_sel_d_dly_ff == OP_A_RS1 )   ||
+                              ( ( hu_wa_m_i == hu_rs2_e_i )  &&  ( hu_wa_m_i != 5'd0 ) && ( hu_use_rs2_e_i ) ) && ( op_b_sel_d_dly_ff == OP_B_RS2 ) ) &&
+                              ( hu_mem_req_m_i            )  && !( hu_mem_we_m_i );
 
-  function automatic logic e_hazard_detector_rs2(
-    input logic [4:0] rd_addr,
-    input logic [4:0] rs1_addr,
-    input logic [6:0] opcode
-  );
-    case( opcode )
-      { OP_OPCODE,     2'b11 },
-      { STORE_OPCODE,  2'b11 },
-      { BRANCH_OPCODE, 2'b11 }: e_hazard_detector_rs2 = ( rd_addr == rs1_addr ) && ( rd_addr != 5'd0 );
-      default:                  e_hazard_detector_rs2 = 1'd0;
-    endcase
-  endfunction
+  assign hu_em_comp_raw   = ( ( ( hu_wa_m_i == hu_rs1_e_i )  &&  ( hu_wa_m_i != 5'd0 ) && ( hu_use_rs1_e_i ) ) && ( op_a_sel_d_dly_ff == OP_A_RS1 )   ||
+                              ( ( hu_wa_m_i == hu_rs2_e_i )  &&  ( hu_wa_m_i != 5'd0 ) && ( hu_use_rs2_e_i ) ) && ( op_b_sel_d_dly_ff == OP_B_RS2 ) ) &&
+                             !( hu_mem_req_m_i            )  && !( hu_mem_we_m_i );
 
-  assign hu_raw_rs1_solve_e_o = e_hazard_detector_rs1( hu_rd_addr_m_i, hu_rs1_addr_e_i, hu_opcode_e_i );
-  assign hu_raw_rs2_solve_e_o = e_hazard_detector_rs2( hu_rd_addr_m_i, hu_rs2_addr_e_i, hu_opcode_e_i );
+  assign hu_ewb_raw       = ( ( hu_wa_wb_i == hu_rs1_e_i ) && ( hu_wa_wb_i != 5'd0 ) && ( hu_use_rs1_e_i ) ) && ( op_a_sel_d_dly_ff == OP_A_RS1 ) ||
+                            ( ( hu_wa_wb_i == hu_rs2_e_i ) && ( hu_wa_wb_i != 5'd0 ) && ( hu_use_rs2_e_i ) ) && ( op_b_sel_d_dly_ff == OP_B_RS2 );
 
-  assign hu_op_a_e_o          = hu_frw_result_m_i;
-  assign hu_op_b_e_o          = hu_frw_result_m_i;
+  assign hu_dwb_raw       = ( ( hu_wa_wb_i == hu_rs1_d_i ) && ( hu_wa_wb_i != 5'd0 ) && ( hu_use_rs1_d_i ) ) && ( hu_op_a_sel_d_i   == OP_A_RS1 ) ||
+                            ( ( hu_wa_wb_i == hu_rs2_d_i ) && ( hu_wa_wb_i != 5'd0 ) && ( hu_use_rs2_d_i ) ) && ( hu_op_b_sel_d_i   == OP_B_RS2 );
+
+  // Hazard acknowledgment
+  logic  hu_em_mem_raw_ack;  // Acknowledgment memory operation RAW hazard between execute and memory stages
+  logic  hu_em_comp_raw_ack; // Acknowledgment computing operation RAW hazard between execute and memory stages
+  logic  hu_ewb_raw_ack;     // Acknowledgment RAW hazard between execute and writeback stages
+  logic  hu_dwb_raw_ack;     // Acknowledgment RAW hazard between decode and writeback stages
+
+  assign hu_em_mem_raw_ack  = ( hu_em_mem_raw  ) && ( hu_gpr_we_m_i  );
+  assign hu_em_comp_raw_ack = ( hu_em_comp_raw ) && ( hu_gpr_we_m_i  );
+  assign hu_ewb_raw_ack     = ( hu_ewb_raw     ) && ( hu_gpr_we_wb_i );
+  assign hu_dwb_raw_ack     = ( hu_dwb_raw     ) && ( hu_gpr_we_wb_i );
+
+  // Hazard resolution for decode stage
+  assign hu_solver_d_o    = ( hu_dwb_raw_ack );
+  assign hu_data_byp_d_o  = ( hu_wb_data_wb_i );
+  assign hu_op_byp_d_o    = ( ( hu_wa_wb_i == hu_rs2_d_i ) && ( hu_op_b_sel_d_i == OP_B_RS2 ) );
+
+  // Hazard resolution for execute stage
+  assign hu_solver_e_o    = ( hu_em_mem_raw_ack  ) || ( hu_em_comp_raw_ack ) || ( hu_ewb_raw_ack );
+
+  assign hu_data_byp_e_o  = ( hu_em_mem_raw  ) ? ( hu_mem_data_m_i ):
+                            ( hu_em_comp_raw ) ? ( hu_comp_res_m_i ):
+                            ( hu_ewb_raw     ) ? ( hu_wb_data_wb_i ):
+                                                 ( 32'd0           );
+
+  assign hu_op_byp_e_o    = ( ( hu_wa_m_i  == hu_rs2_e_i ) && ( op_b_sel_d_dly_ff == OP_B_RS2 ) ) ||
+                            ( ( hu_wa_wb_i == hu_rs2_e_i ) && ( op_b_sel_d_dly_ff == OP_B_RS2 ) );
 
 endmodule

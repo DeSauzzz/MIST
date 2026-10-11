@@ -15,7 +15,8 @@ module mist_execute_stage(
   input  logic        gpr_we_d_i,
 
   input  logic        ill_instr_d_i,
-  input  logic [6:0]  pd_opcode_d_i,
+  input  logic        use_rs1_d_i,
+  input  logic        use_rs2_d_i,
 
   input  logic [2:0]  csr_op_d_i,
   input  logic        csr_we_d_i,
@@ -40,19 +41,18 @@ module mist_execute_stage(
   input  logic        hu_stall_e_i,
   input  logic        hu_flush_e_i,
 
-  input  logic        hu_raw_solve_op_a_e_i,
-  input  logic        hu_raw_solve_op_b_e_i,
-
-  input  logic [31:0] hu_frw_op_a_i,
-  input  logic [31:0] hu_frw_op_b_i,
+  input  logic        hu_solver_e_i,
+  input  logic        hu_op_byp_e_i,
+  input  logic [31:0] hu_data_byp_e_i,
 
   // To Hazard Unit
+  output logic [4:0]  hu_rs1_e_o,
+  output logic [4:0]  hu_rs2_e_o,
+
   output logic        hu_flush_req_e_o,
 
-  output logic [4:0]  hu_rs1_addr_e_o,
-  output logic [4:0]  hu_rs2_addr_e_o,
-  output logic [4:0]  hu_rd_addr_e_o,
-  output logic [31:0] hu_frw_result_e_o,
+  output logic        hu_use_rs1_e_o,
+  output logic        hu_use_rs2_e_o,
 
   // To fetch stage
   output logic        alu_flag_e_o,
@@ -68,7 +68,6 @@ module mist_execute_stage(
   output logic        gpr_we_e_o,
 
   output logic        ill_instr_e_o,
-  output logic [6:0]  pd_opcode_e_o,
 
   output logic [2:0]  csr_op_e_o,
   output logic        csr_we_e_o,
@@ -89,8 +88,8 @@ module mist_execute_stage(
   logic [31:0] alu_result;
   logic        alu_flag;
 
-  assign op_a = ( hu_raw_solve_op_a_e_i ) ? ( hu_frw_op_a_i ) : ( op_a_d_i );
-  assign op_b = ( hu_raw_solve_op_b_e_i ) ? ( hu_frw_op_b_i ) : ( op_b_d_i );
+  assign op_a = ( ( hu_solver_e_i ) && !( hu_op_byp_e_i ) ) ? ( hu_data_byp_e_i ) : ( op_a_d_i );
+  assign op_b = ( ( hu_solver_e_i ) &&  ( hu_op_byp_e_i ) ) ? ( hu_data_byp_e_i ) : ( op_b_d_i );
 
   mist_alu e_alu(
     .op_a_i   ( op_a       ),
@@ -116,11 +115,6 @@ module mist_execute_stage(
   assign alu_flag_e_o  = alu_flag;
 
   // To Hazard Unit
-  assign hu_rs1_addr_e_o   = gpr_rs1_addr_d_i;
-  assign hu_rs2_addr_e_o   = gpr_rs2_addr_d_i;
-  assign hu_rd_addr_e_o    = gpr_wa_d_i;
-  assign hu_frw_result_e_o = alu_result;
-
   logic hu_flush_req;
 
   always_comb begin
@@ -131,7 +125,13 @@ module mist_execute_stage(
       hu_flush_req = 1'd1;
   end
 
+  assign hu_rs1_e_o       = gpr_rs1_addr_d_i;
+  assign hu_rs2_e_o       = gpr_rs2_addr_d_i;
+
   assign hu_flush_req_e_o = hu_flush_req;
+
+  assign hu_use_rs1_e_o   = use_rs1_d_i;
+  assign hu_use_rs2_e_o   = use_rs2_d_i;
 
   // To memory stage
   always_ff @( posedge clk_i ) begin
@@ -139,7 +139,6 @@ module mist_execute_stage(
       alu_result_e_o    <= 32'd0;
       gpr_wa_e_o        <= 5'd0;
       ill_instr_e_o     <= 1'd0;
-      pd_opcode_e_o     <= 7'd0;
       csr_op_e_o        <= 3'd0;
       csr_we_e_o        <= 1'd0;
       lsu_req_e_o       <= 1'd0;
@@ -154,7 +153,6 @@ module mist_execute_stage(
       alu_result_e_o    <= 32'd0;
       gpr_wa_e_o        <= 5'd0;
       ill_instr_e_o     <= 1'd0;
-      pd_opcode_e_o     <= 7'd0;
       csr_op_e_o        <= 3'd0;
       csr_we_e_o        <= 1'd0;
       lsu_req_e_o       <= 1'd0;
@@ -169,7 +167,6 @@ module mist_execute_stage(
       alu_result_e_o    <= alu_result;
       gpr_wa_e_o        <= gpr_wa_d_i;
       ill_instr_e_o     <= ill_instr_d_i;
-      pd_opcode_e_o     <= pd_opcode_d_i;
       csr_op_e_o        <= csr_op_d_i;
       csr_we_e_o        <= csr_we_d_i;
       lsu_req_e_o       <= lsu_req_d_i;

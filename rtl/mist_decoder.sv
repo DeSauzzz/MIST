@@ -6,6 +6,8 @@ module mist_decoder(
   input  logic [31:0] instr_i,
 
   output logic        ill_instr_o,
+  output logic        use_rs1_o,
+  output logic        use_rs2_o,
 
   output logic [2:0]  csr_op_o,
   output logic        csr_we_o,
@@ -41,6 +43,17 @@ module mist_decoder(
   assign funct7      = instr_i[31:25];
 
   assign mret_o      = ( instr_i == mret ) ? ( 1'd1 ) : ( 1'd0 );
+  assign use_rs1_o   = opcode inside { JALR_OPCODE,
+                                       BRANCH_OPCODE,
+                                       LOAD_OPCODE,
+                                       STORE_OPCODE,
+                                       IMM_OPCODE,
+                                       OP_OPCODE
+                                     };
+  assign use_rs2_o   = opcode inside { BRANCH_OPCODE,
+                                       STORE_OPCODE,
+                                       OP_OPCODE
+                                     };
 
   // illegal instruction logic
   logic       ill_instr;
