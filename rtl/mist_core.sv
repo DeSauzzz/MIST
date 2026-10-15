@@ -16,6 +16,7 @@ module mist_core(
   // Data Memory Interface
   input  logic        mem_ack_i,
   input  logic [31:0] mem_rd_i,
+
   output logic [31:0] mem_addr_o,
   output logic [31:0] mem_wd_o,
   output logic [3:0]  mem_be_o,
@@ -109,7 +110,15 @@ module mist_core(
   // Communication with mist system //
   ////////////////////////////////////
 
-  // TODO
+  // Data Memory Interface
+  assign mem_ack [m] = mem_ack_i;
+  assign mem_rd  [m] = mem_rd_i;
+
+  assign mem_be_o    = mem_be   [m];
+  assign mem_req_o   = mem_req  [m];
+  assign mem_we_o    = mem_we   [m];
+  assign mem_addr_o  = mem_addr [m];
+  assign mem_wd_o    = mem_wd   [m];
 
   /////////////////////
   // Writeback stage //
@@ -139,9 +148,7 @@ module mist_core(
   // Module instances //
   //////////////////////
 
-  mist_fetch_stage #(
-    .INIT_IMEM("program.mem")
-  ) fetch_stage (
+  mist_fetch_stage fetch_stage (
     .clk_i                 ( clk_i                ),
     .rstn_i                ( rstn_i               ),
 
@@ -155,6 +162,12 @@ module mist_core(
     // From Hazard Unit
     .hu_stall_f_i          ( hu_stall         [f] ),
     .hu_flush_f_i          ( hu_flush         [f] ),
+
+    // From Instruction Memory
+    .sys_instr_i           ( instr_i              ),
+
+    // To Instruction Memory
+    .sys_addr_o            ( instr_addr_o         ),
 
     // To Decode Stage
     .instr_f_o             ( instr            [f] ),
@@ -435,20 +448,6 @@ module mist_core(
     .hu_flush_d_o          ( hu_flush         [d] ),
     .hu_flush_e_o          ( hu_flush         [e] ),
     .hu_flush_m_o          ( hu_flush         [m] )
-  );
-
-  mist_data_mem data_mem(
-    .clk_i                 ( clk_i                ),
-    .rstn_i                ( rstn_i               ),
-
-    .mem_be_i              ( mem_be           [m] ),
-    .mem_addr_i            ( mem_addr         [m] ),
-    .mem_req_i             ( mem_req          [m] ),
-    .mem_we_i              ( mem_we           [m] ),
-    .mem_wd_i              ( mem_wd           [m] ),
-
-    .mem_rd_o              ( mem_rd           [m] ),
-    .mem_ack_o             ( mem_ack          [m] )
   );
 
 endmodule

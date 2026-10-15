@@ -1,6 +1,4 @@
-module mist_fetch_stage #(
-  parameter INIT_IMEM = ""
-)(
+module mist_fetch_stage (
   input  logic        clk_i,
   input  logic        rstn_i,
 
@@ -15,15 +13,21 @@ module mist_fetch_stage #(
   input  logic        hu_stall_f_i,
   input  logic        hu_flush_f_i,
 
+  // From Instruction Memory
+  input  logic [31:0] sys_instr_i,
+
+  // To Instruction Memory
+  output logic [31:0] sys_addr_o,
+
   // To Decode Stage
   output logic [31:0] instr_f_o,
   output logic [31:0] pc_cur_f_o
 );
 
-  logic [31:0] instr_cur;
-
   logic [31:0] pc_cur;
   logic [31:0] pc_nxt;
+
+  assign sys_addr_o = pc_cur;
 
   always_ff @( posedge clk_i ) begin
     if( !rstn_i )
@@ -43,16 +47,9 @@ module mist_fetch_stage #(
     else if( hu_flush_f_i )
       instr_f_o  <= 32'd0;
     else if( !hu_stall_f_i ) begin
-      instr_f_o  <= instr_cur;
+      instr_f_o  <= sys_instr_i;
       pc_cur_f_o <= pc_cur;
     end
   end
-
-  mist_instr_mem #(
-    .INIT_IMEM(INIT_IMEM)
-  ) f_imem (
-    .read_addr_i ( pc_cur          ),
-    .read_data_o ( instr_cur       )
-  );
 
 endmodule
