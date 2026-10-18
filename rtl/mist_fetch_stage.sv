@@ -27,6 +27,9 @@ module mist_fetch_stage (
   logic [31:0] pc_cur;
   logic [31:0] pc_nxt;
 
+  logic [31:0] nop;
+  assign       nop = 32'h00000013; // addi x0, x0, x0 used like no operation
+
   assign sys_addr_o = pc_cur;
 
   always_ff @( posedge clk_i ) begin
@@ -39,16 +42,22 @@ module mist_fetch_stage (
   assign pc_nxt = ( ( jalr_e_i ) || ( jal_e_i ) || ( branch_e_i && alu_flag_e_i ) ) ? ( offset_pc_e_i  ):
                                                                                       ( pc_cur + 32'd4 );
 
+  // Next PC logic
+  always_ff @( posedge clk_i ) begin
+    if( !rstn_i )
+      pc_cur_f_o <= 32'd0;
+    else if( !hu_stall_f_i )
+      pc_cur_f_o <= pc_cur;
+  end
+
   always_ff @( posedge clk_i ) begin
     if( !rstn_i ) begin
       instr_f_o  <= 32'd0;
-      pc_cur_f_o <= 32'd0;
     end
     else if( hu_flush_f_i )
-      instr_f_o  <= 32'd0;
+      instr_f_o  <= nop;
     else if( !hu_stall_f_i ) begin
       instr_f_o  <= sys_instr_i;
-      pc_cur_f_o <= pc_cur;
     end
   end
 
