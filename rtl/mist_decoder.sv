@@ -42,7 +42,7 @@ module mist_decoder(
   assign funct3      = instr_i[14:12];
   assign funct7      = instr_i[31:25];
 
-  assign mret_o      = ( instr_i == mret ) ? ( 1'd1 ) : ( 1'd0 );
+  assign mret_o      = ( instr_i == mret );
   assign use_rs1_o   = opcode inside { JALR_OPCODE,
                                        BRANCH_OPCODE,
                                        LOAD_OPCODE,
@@ -108,63 +108,63 @@ module mist_decoder(
 
   // ALU logic
   always_comb begin
-    case( { funct7[5], funct3, opcode, ill_instr } ) inside
+    case( { funct7[5], funct3, opcode } ) inside
       // Branch op's
-      { 1'd?, 3'd0, BRANCH_OPCODE, 1'b0 }: alu_op_o = ALU_EQ;
-      { 1'd?, 3'd1, BRANCH_OPCODE, 1'b0 }: alu_op_o = ALU_NE;
-      { 1'd?, 3'd4, BRANCH_OPCODE, 1'b0 }: alu_op_o = ALU_LT;
-      { 1'd?, 3'd5, BRANCH_OPCODE, 1'b0 }: alu_op_o = ALU_GE;
-      { 1'd?, 3'd6, BRANCH_OPCODE, 1'b0 }: alu_op_o = ALU_LTU;
-      { 1'd?, 3'd7, BRANCH_OPCODE, 1'b0 }: alu_op_o = ALU_GEU;
+      { 1'd?, 3'd0, BRANCH_OPCODE }: alu_op_o = ALU_EQ;
+      { 1'd?, 3'd1, BRANCH_OPCODE }: alu_op_o = ALU_NE;
+      { 1'd?, 3'd4, BRANCH_OPCODE }: alu_op_o = ALU_LT;
+      { 1'd?, 3'd5, BRANCH_OPCODE }: alu_op_o = ALU_GE;
+      { 1'd?, 3'd6, BRANCH_OPCODE }: alu_op_o = ALU_LTU;
+      { 1'd?, 3'd7, BRANCH_OPCODE }: alu_op_o = ALU_GEU;
       // Imm op's
-      { 1'd?, 3'd0, IMM_OPCODE, 1'b0    }: alu_op_o = ALU_ADD;
-      { 1'd?, 3'd2, IMM_OPCODE, 1'b0    }: alu_op_o = ALU_SLT;
-      { 1'd?, 3'd3, IMM_OPCODE, 1'b0    }: alu_op_o = ALU_SLTU;
-      { 1'd?, 3'd4, IMM_OPCODE, 1'b0    }: alu_op_o = ALU_XOR;
-      { 1'd?, 3'd6, IMM_OPCODE, 1'b0    }: alu_op_o = ALU_OR;
-      { 1'd?, 3'd7, IMM_OPCODE, 1'b0    }: alu_op_o = ALU_AND;
-      { 1'd0, 3'd1, IMM_OPCODE, 1'b0    }: alu_op_o = ALU_SLL;
-      { 1'd0, 3'd5, IMM_OPCODE, 1'b0    }: alu_op_o = ALU_SRL;
-      { 1'd1, 3'd5, IMM_OPCODE, 1'b0    }: alu_op_o = ALU_SRA;
+      { 1'd?, 3'd0, IMM_OPCODE    }: alu_op_o = ALU_ADD;
+      { 1'd?, 3'd2, IMM_OPCODE    }: alu_op_o = ALU_SLT;
+      { 1'd?, 3'd3, IMM_OPCODE    }: alu_op_o = ALU_SLTU;
+      { 1'd?, 3'd4, IMM_OPCODE    }: alu_op_o = ALU_XOR;
+      { 1'd?, 3'd6, IMM_OPCODE    }: alu_op_o = ALU_OR;
+      { 1'd?, 3'd7, IMM_OPCODE    }: alu_op_o = ALU_AND;
+      { 1'd0, 3'd1, IMM_OPCODE    }: alu_op_o = ALU_SLL;
+      { 1'd0, 3'd5, IMM_OPCODE    }: alu_op_o = ALU_SRL;
+      { 1'd1, 3'd5, IMM_OPCODE    }: alu_op_o = ALU_SRA;
       // RS op's
-      { 1'd0, 3'd0, OP_OPCODE, 1'b0     }: alu_op_o = ALU_ADD;
-      { 1'd1, 3'd0, OP_OPCODE, 1'b0     }: alu_op_o = ALU_SUB;
-      { 1'd?, 3'd1, OP_OPCODE, 1'b0     }: alu_op_o = ALU_SLL;
-      { 1'd?, 3'd2, OP_OPCODE, 1'b0     }: alu_op_o = ALU_SLT;
-      { 1'd?, 3'd3, OP_OPCODE, 1'b0     }: alu_op_o = ALU_SLTU;
-      { 1'd?, 3'd4, OP_OPCODE, 1'b0     }: alu_op_o = ALU_XOR;
-      { 1'd0, 3'd5, OP_OPCODE, 1'b0     }: alu_op_o = ALU_SRL;
-      { 1'd1, 3'd5, OP_OPCODE, 1'b0     }: alu_op_o = ALU_SRA;
-      { 1'd?, 3'd6, OP_OPCODE, 1'b0     }: alu_op_o = ALU_OR;
-      { 1'd?, 3'd7, OP_OPCODE, 1'b0     }: alu_op_o = ALU_AND;
-      default:                             alu_op_o = ALU_ADD;
+      { 1'd0, 3'd0, OP_OPCODE     }: alu_op_o = ALU_ADD;
+      { 1'd1, 3'd0, OP_OPCODE     }: alu_op_o = ALU_SUB;
+      { 1'd?, 3'd1, OP_OPCODE     }: alu_op_o = ALU_SLL;
+      { 1'd?, 3'd2, OP_OPCODE     }: alu_op_o = ALU_SLT;
+      { 1'd?, 3'd3, OP_OPCODE     }: alu_op_o = ALU_SLTU;
+      { 1'd?, 3'd4, OP_OPCODE     }: alu_op_o = ALU_XOR;
+      { 1'd0, 3'd5, OP_OPCODE     }: alu_op_o = ALU_SRL;
+      { 1'd1, 3'd5, OP_OPCODE     }: alu_op_o = ALU_SRA;
+      { 1'd?, 3'd6, OP_OPCODE     }: alu_op_o = ALU_OR;
+      { 1'd?, 3'd7, OP_OPCODE     }: alu_op_o = ALU_AND;
+      default:                       alu_op_o = ALU_ADD;
     endcase
   end
 
   always_comb begin
-    case( { opcode, ill_instr } )
-      { OP_OPCODE,     1'b0 },
-      { IMM_OPCODE,    1'b0 },
-      { BRANCH_OPCODE, 1'b0 },
-      { LOAD_OPCODE,   1'b0 },
-      { JALR_OPCODE,   1'b0 },
-      { STORE_OPCODE,  1'b0 }: alu_op_a_sel_o = OP_A_RS1;
-      { LUI_OPCODE,    1'b0 }: alu_op_a_sel_o = OP_A_ZERO;
-      default:                 alu_op_a_sel_o = OP_A_CURR_PC;
+    case( opcode )
+      OP_OPCODE,
+      IMM_OPCODE,
+      BRANCH_OPCODE,
+      LOAD_OPCODE,
+      JALR_OPCODE,
+      STORE_OPCODE: alu_op_a_sel_o = OP_A_RS1;
+      LUI_OPCODE:   alu_op_a_sel_o = OP_A_ZERO;
+      default:      alu_op_a_sel_o = OP_A_CURR_PC;
     endcase
   end
 
   always_comb begin
-    case( { opcode, ill_instr } )
-      { BRANCH_OPCODE, 1'b0 },
-      { OP_OPCODE,     1'b0 }: alu_op_b_sel_o = OP_B_RS2;
-      { STORE_OPCODE,  1'b0 }: alu_op_b_sel_o = OP_B_IMM_S;
-      { LOAD_OPCODE,   1'b0 },
-      { JALR_OPCODE,   1'b0 },
-      { IMM_OPCODE,    1'b0 }: alu_op_b_sel_o = OP_B_IMM_I;
-      { LUI_OPCODE,    1'b0 },
-      { AUIPC_OPCODE,  1'b0 }: alu_op_b_sel_o = OP_B_IMM_U;
-      default:                 alu_op_b_sel_o = OP_B_INCR;
+    case( opcode )
+      BRANCH_OPCODE,
+      OP_OPCODE:     alu_op_b_sel_o = OP_B_RS2;
+      STORE_OPCODE:  alu_op_b_sel_o = OP_B_IMM_S;
+      LOAD_OPCODE,
+      JALR_OPCODE,
+      IMM_OPCODE:    alu_op_b_sel_o = OP_B_IMM_I;
+      LUI_OPCODE,
+      AUIPC_OPCODE:  alu_op_b_sel_o = OP_B_IMM_U;
+      default:       alu_op_b_sel_o = OP_B_INCR;
     endcase
   end
 
@@ -172,16 +172,16 @@ module mist_decoder(
   assign gpr_we_o = !( ill_instr ) && ( instr_i != mret ) && ( opcode inside { OP_OPCODE, IMM_OPCODE, LOAD_OPCODE, JAL_OPCODE, JALR_OPCODE,
                                                                                LUI_OPCODE, AUIPC_OPCODE, SYSTEM_OPCODE } );
   always_comb begin
-    case( { opcode, ill_instr } )
-      { OP_OPCODE,     1'b0  },
-      { IMM_OPCODE,    1'b0  },
-      { JAL_OPCODE,    1'b0  },
-      { JALR_OPCODE,   1'b0  },
-      { LUI_OPCODE,    1'b0  },
-      { AUIPC_OPCODE,  1'b0  }: wb_sel_o = EXEC_WB_RESULT;
-      { SYSTEM_OPCODE, 1'b0  }: wb_sel_o = CSR_WB_DATA;
-      { LOAD_OPCODE,   1'b0  }: wb_sel_o = LSU_WB_DATA;
-      default:                  wb_sel_o = EXEC_WB_RESULT;
+    case( opcode )
+      OP_OPCODE,
+      IMM_OPCODE,
+      JAL_OPCODE,
+      JALR_OPCODE,
+      LUI_OPCODE,
+      AUIPC_OPCODE:  wb_sel_o = EXEC_WB_RESULT;
+      SYSTEM_OPCODE: wb_sel_o = CSR_WB_DATA;
+      LOAD_OPCODE:   wb_sel_o = LSU_WB_DATA;
+      default:       wb_sel_o = EXEC_WB_RESULT;
     endcase
   end
 
