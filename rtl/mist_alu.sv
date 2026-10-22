@@ -26,8 +26,8 @@ module mist_alu(
         ALU_SLL:  result_o = op_a_i <<   op_b_i[4:0];
         ALU_SRL:  result_o = op_a_i >>   op_b_i[4:0];
         ALU_SRA:  result_o = op_a_i >>>  op_b_i[4:0];
-        ALU_SLT:  result_o = ( $signed(op_a_i) < $signed(op_b_i) ) ? ( 1'd1 ) : ( 1'd0 );
-        ALU_SLTU: result_o = ( op_a_i < op_b_i                   ) ? ( 1'd1 ) : ( 1'd0 );
+        ALU_SLT:  result_o = { 30'd0, $signed(op_a_i) < $signed(op_b_i) };
+        ALU_SLTU: result_o = { 30'd0, op_a_i < op_b_i                   };
         default:  result_o = 32'd0;
       endcase
     end
@@ -38,12 +38,12 @@ module mist_alu(
   always_comb begin
     if( cmp_op ) begin
       case( alu_op_i )
-        ALU_EQ:  flag_o = ( op_a_i == op_b_i ) ? ( 1'd1 ) : ( 1'd0 );
-        ALU_NE:  flag_o = ( op_a_i != op_b_i ) ? ( 1'd1 ) : ( 1'd0 );
-        ALU_LT:  flag_o = ( op_a_i <  op_b_i ) ? ( 1'd1 ) : ( 1'd0 );
-        ALU_GE:  flag_o = ( op_a_i >  op_b_i ) ? ( 1'd1 ) : ( 1'd0 );
-        ALU_LTU: flag_o = ( op_a_i <= op_b_i ) ? ( 1'd1 ) : ( 1'd0 );
-        ALU_GEU: flag_o = ( op_a_i >= op_b_i ) ? ( 1'd1 ) : ( 1'd0 );
+        ALU_EQ:  flag_o = ( op_a_i == op_b_i );
+        ALU_NE:  flag_o = ( op_a_i != op_b_i );
+        ALU_LT:  flag_o = ( op_a_i <  op_b_i );
+        ALU_GE:  flag_o = ( op_a_i >  op_b_i );
+        ALU_LTU: flag_o = ( op_a_i <= op_b_i );
+        ALU_GEU: flag_o = ( op_a_i >= op_b_i );
         default: flag_o = 1'd0;
       endcase
     end
