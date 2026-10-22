@@ -147,6 +147,7 @@ module mist_decoder(
       { IMM_OPCODE,    1'b0 },
       { BRANCH_OPCODE, 1'b0 },
       { LOAD_OPCODE,   1'b0 },
+      { JALR_OPCODE,   1'b0 },
       { STORE_OPCODE,  1'b0 }: alu_op_a_sel_o = OP_A_RS1;
       { LUI_OPCODE,    1'b0 }: alu_op_a_sel_o = OP_A_ZERO;
       default:                 alu_op_a_sel_o = OP_A_CURR_PC;
@@ -159,6 +160,7 @@ module mist_decoder(
       { OP_OPCODE,     1'b0 }: alu_op_b_sel_o = OP_B_RS2;
       { STORE_OPCODE,  1'b0 }: alu_op_b_sel_o = OP_B_IMM_S;
       { LOAD_OPCODE,   1'b0 },
+      { JALR_OPCODE,   1'b0 },
       { IMM_OPCODE,    1'b0 }: alu_op_b_sel_o = OP_B_IMM_I;
       { LUI_OPCODE,    1'b0 },
       { AUIPC_OPCODE,  1'b0 }: alu_op_b_sel_o = OP_B_IMM_U;
