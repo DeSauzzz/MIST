@@ -1,9 +1,12 @@
 module mist_system #(
-  parameter INIT_IMEM = "program.mem"
+  parameter INIT_IMEM = "instr.mem",
+  parameter INIT_DMEM = "data.mem"
 )(
   input logic clk_i,
   input logic rstn_i
 );
+
+  localparam [31:0] TIMER_ADDR = 32'h0001_0000;
 
   // Instruction Memory Interface
   logic [31:0] instr_addr;
@@ -17,6 +20,12 @@ module mist_system #(
   logic        mem_req;
   logic        mem_we;
   logic        mem_ack;
+
+  // TODO: Optimize it
+  logic [31:0] timer_dat;
+  logic [31:0] dat2core;
+
+  assign dat2core = ( mem_addr == TIMER_ADDR ) ? ( timer_dat ) : ( mem_rd );
 
   mist_core core (
     .clk_i        ( clk_i      ),
@@ -40,7 +49,9 @@ module mist_system #(
     .mem_we_o     ( mem_we     )
   );
 
-  mist_data_mem dmem (
+  mist_data_mem #(
+    .INIT_DMEM(INIT_DMEM)
+  ) dmem (
     .clk_i        ( clk_i      ),
     .rstn_i       ( rstn_i     ),
 
@@ -59,6 +70,12 @@ module mist_system #(
   ) imem (
     .read_addr_i  ( instr_addr ),
     .read_data_o  ( instr_data )
+  );
+
+  mist_timer timer(
+    .clk_i   ( clk_i     ),
+    .rstn_i  ( rstn_i    ),
+    .timer_o ( timer_dat )
   );
 
 endmodule

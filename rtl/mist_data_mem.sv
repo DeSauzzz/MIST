@@ -1,7 +1,9 @@
 import mist_mem_pkg::DATA_MEM_BYTE_SIZE;
 import mist_mem_pkg::DATA_MEM_WORD_SIZE;
 
-module mist_data_mem(
+module mist_data_mem#(
+  parameter INIT_DMEM = ""
+)(
   input  logic        clk_i,
   input  logic        rstn_i,
 
@@ -16,6 +18,10 @@ module mist_data_mem(
 );
 
   logic [31:0] memory [DATA_MEM_WORD_SIZE];
+
+  initial begin
+    $readmemh(INIT_DMEM, memory);
+  end
 
   // Acknowledge from memory
   logic mem_ack_ff;
