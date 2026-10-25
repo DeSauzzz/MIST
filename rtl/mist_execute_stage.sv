@@ -149,7 +149,7 @@ module mist_execute_stage(
       mret_e_o          <= 1'd0;
       wb_sel_e_o        <= 2'd0;
     end
-    else if( hu_flush_e_i ) begin
+    else if( ( hu_flush_e_i ) && !( hu_stall_e_i ) ) begin
       alu_result_e_o    <= 32'd0;
       gpr_wa_e_o        <= 5'd0;
       ill_instr_e_o     <= 1'd0;

@@ -101,7 +101,7 @@ module mist_memory_stage(
       gpr_we_m_o     <= 1'd0;
       wb_sel_m_o     <= 2'd0;
     end
-    else if( hu_flush_m_i ) begin
+    else if( ( hu_flush_m_i ) && !( hu_stall_m_i ) ) begin
       lsu_rd_m_o     <= lsu_rd;
       alu_result_m_o <= 32'd0;
       gpr_wa_m_o     <= 5'd0;

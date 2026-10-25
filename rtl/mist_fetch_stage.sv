@@ -54,7 +54,7 @@ module mist_fetch_stage (
     if( !rstn_i ) begin
       instr_f_o  <= 32'd0;
     end
-    else if( hu_flush_f_i )
+    else if( ( hu_flush_f_i ) && !( hu_stall_f_i ) )
       instr_f_o  <= nop;
     else if( !hu_stall_f_i ) begin
       instr_f_o  <= sys_instr_i;

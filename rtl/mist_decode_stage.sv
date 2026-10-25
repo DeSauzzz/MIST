@@ -265,7 +265,7 @@ module mist_decode_stage(
       op_b_d_o         <= 32'd0;
       pc_cur_d_o       <= 32'd0;
     end
-    else if( hu_flush_d_i ) begin
+    else if( ( hu_flush_d_i ) && !( hu_stall_d_i ) ) begin
       imm_b_d_o        <= 32'd0;
       imm_j_d_o        <= 32'd0;
       gpr_rs1_addr_d_o <= 5'd0;
