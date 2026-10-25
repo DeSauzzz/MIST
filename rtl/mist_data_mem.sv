@@ -44,8 +44,8 @@ module mist_data_mem#(
       4'b1100: wr_data = mem_wd_i[31:16];
       4'b0001: wr_data = mem_wd_i[7:  0];
       4'b0010: wr_data = mem_wd_i[15: 8];
-      4'b0100: wr_data = mem_wd_i[24:16];
-      4'b1000: wr_data = mem_wd_i[31:25];
+      4'b0100: wr_data = mem_wd_i[23:16];
+      4'b1000: wr_data = mem_wd_i[31:24];
       default: wr_data = 32'd0;
     endcase
   end
