@@ -103,10 +103,10 @@ module mist_execute_stage(
   // Offset generator
   logic [31:0] offset_pc;
 
-  assign offset_pc = ( branch_d_i ) ? ( pc_cur_d_i + imm_b_d_i  ):
-                     ( jal_d_i    ) ? ( pc_cur_d_i + imm_j_d_i  ):
-                     ( jalr_d_i   ) ? ( pc_cur_d_i + alu_result ):
-                                      ( 32'd0                   );
+  assign offset_pc = ( branch_d_i ) ? ( pc_cur_d_i + imm_b_d_i     ):
+                     ( jal_d_i    ) ? ( pc_cur_d_i + imm_j_d_i     ):
+                     ( jalr_d_i   ) ? ( { alu_result[31:1], 1'd0 } ):
+                                      ( 32'd0                      );
 
   assign offset_pc_e_o = offset_pc;
   assign branch_e_o    = branch_d_i;
