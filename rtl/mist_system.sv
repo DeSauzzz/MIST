@@ -40,7 +40,7 @@ module mist_system #(
 
     // Data Memory Interface
     .mem_ack_i    ( mem_ack    ),
-    .mem_rd_i     ( mem_rd     ),
+    .mem_rd_i     ( dat2core   ),
 
     .mem_addr_o   ( mem_addr   ),
     .mem_wd_o     ( mem_wd     ),
