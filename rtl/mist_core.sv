@@ -80,7 +80,7 @@ module mist_core(
   logic [31:0] imm_b             [d:d];
   logic [31:0] imm_j             [d:d];
 
-  logic [31:0] alu_result        [e:w];
+  logic [31:0] comp_result       [e:w];
   logic [3:0]  alu_op            [d:d];
   logic        alu_flag          [e:e];
 
@@ -130,7 +130,7 @@ module mist_core(
   // Writeback stage //
   /////////////////////
 
-  assign alu_result[w]  = alu_result[m];
+  assign comp_result[w] = comp_result[m];
 
   assign gpr_wa    [w]  = gpr_wa    [m];
   assign gpr_we    [w]  = gpr_we    [m];
@@ -143,8 +143,8 @@ module mist_core(
 
   always_comb begin
     case( wb_sel[w] )
-      EXEC_WB_RESULT: gpr_wd[w] = alu_result[w];
-      LSU_WB_DATA:    gpr_wd[w] = lsu_rd    [w];
+      EXEC_WB_RESULT: gpr_wd[w] = comp_result[w];
+      LSU_WB_DATA:    gpr_wd[w] = lsu_rd     [w];
       CSR_WB_DATA:    gpr_wd[w] = 32'd0;         // TODO: Fix when CSR appears
       default:        gpr_wd[w] = 32'd0;
     endcase
@@ -319,7 +319,7 @@ module mist_core(
     .offset_pc_e_o         ( offset_pc        [e] ),
 
     // To memory stage
-    .alu_result_e_o        ( alu_result       [e] ),
+    .comp_result_e_o       ( comp_result      [e] ),
 
     .gpr_wa_e_o            ( gpr_wa           [e] ),
     .gpr_we_e_o            ( gpr_we           [e] ),
@@ -345,7 +345,7 @@ module mist_core(
     .trap_m_i              ( 1'd0                 ), // TODO: Because interrupts not supported
 
     // From execute stage
-    .alu_result_e_i        ( alu_result       [e] ),
+    .comp_result_e_i       ( comp_result      [e] ),
 
     .gpr_wa_e_i            ( gpr_wa           [e] ),
     .gpr_we_e_i            ( gpr_we           [e] ),
@@ -390,7 +390,7 @@ module mist_core(
     // To writeback stage
     .lsu_rd_m_o            ( lsu_rd           [m] ),
 
-    .alu_result_m_o        ( alu_result       [m] ),
+    .comp_result_m_o       ( comp_result      [m] ),
 
     .gpr_wa_m_o            ( gpr_wa           [m] ),
     .gpr_we_m_o            ( gpr_we           [m] ),

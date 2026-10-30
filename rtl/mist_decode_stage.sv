@@ -289,7 +289,6 @@ module mist_decode_stage(
       wb_sel_d_o       <= 2'd0;
       op_a_d_o         <= 32'd0;
       op_b_d_o         <= 32'd0;
-      pc_cur_d_o       <= 32'd0;
     end
     else if( !hu_stall_d_i ) begin
       imm_b_d_o        <= imm_b;

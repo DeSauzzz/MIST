@@ -70,7 +70,7 @@ module mist_execute_stage(
   output logic [31:0] offset_pc_e_o,
 
   // To memory stage
-  output logic [31:0] alu_result_e_o,
+  output logic [31:0] comp_result_e_o,
 
   output logic [4:0]  gpr_wa_e_o,
   output logic        gpr_we_e_o,
@@ -133,6 +133,11 @@ module mist_execute_stage(
   assign jal_e_o       = jal_d_i;
   assign alu_flag_e_o  = alu_flag;
 
+  // Computational result generator
+  logic [31:0] comp_result;
+
+  assign comp_result = ( ( jalr_d_i ) || ( jal_d_i ) ) ? ( pc_cur_d_i + 'd4 ) : ( alu_result );
+
   // To Hazard Unit
   logic hu_flush_req;
 
@@ -158,7 +163,7 @@ module mist_execute_stage(
   // To memory stage
   always_ff @( posedge clk_i ) begin
     if( !rstn_i ) begin
-      alu_result_e_o    <= 32'd0;
+      comp_result_e_o    <= 32'd0;
       gpr_wa_e_o        <= 5'd0;
       ill_instr_e_o     <= 1'd0;
       csr_op_e_o        <= 3'd0;
@@ -172,7 +177,7 @@ module mist_execute_stage(
       wb_sel_e_o        <= 2'd0;
     end
     else if( ( hu_flush_e_i ) && !( hu_stall_e_i ) ) begin
-      alu_result_e_o    <= 32'd0;
+      comp_result_e_o    <= 32'd0;
       gpr_wa_e_o        <= 5'd0;
       ill_instr_e_o     <= 1'd0;
       csr_op_e_o        <= 3'd0;
@@ -186,7 +191,7 @@ module mist_execute_stage(
       wb_sel_e_o        <= 2'd0;
     end
     else if( !hu_stall_e_i ) begin
-      alu_result_e_o    <= alu_result;
+      comp_result_e_o   <= comp_result;
       gpr_wa_e_o        <= gpr_wa_d_i;
       ill_instr_e_o     <= ill_instr_d_i;
       csr_op_e_o        <= csr_op_d_i;
