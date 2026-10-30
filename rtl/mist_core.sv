@@ -50,12 +50,18 @@ module mist_core(
   logic        hu_use_rs1        [d:e];
   logic        hu_use_rs2        [d:e];
 
-  logic        hu_mem_req        [m:m];
-  logic        hu_mem_we         [m:m];
+  logic        hu_mem_req        [e:m];
+  logic        hu_mem_we         [e:m];
 
-  logic        hu_solver         [d:e];
-  logic        hu_op_byp         [d:e];
-  logic [31:0] hu_data_byp       [d:e];
+  logic [1:0]  hu_solver_lsu     [e:e];
+
+  logic        hu_solver_m       [e:e];
+  logic        hu_op_byp_m       [e:e];
+  logic [31:0] hu_data_byp_m     [e:e];
+
+  logic        hu_solver_wb      [d:e];
+  logic        hu_op_byp_wb      [d:e];
+  logic [31:0] hu_data_byp_wb    [d:e];
 
   logic        mret              [d:e];
 
@@ -191,9 +197,9 @@ module mist_core(
     .hu_stall_d_i          ( hu_stall         [d] ),
     .hu_flush_d_i          ( hu_flush         [d] ),
 
-    .hu_solver_d_i         ( hu_solver        [d] ),
-    .hu_op_byp_d_i         ( hu_op_byp        [d] ),
-    .hu_data_byp_d_i       ( hu_data_byp      [d] ),
+    .hu_solver_wb_d_i      ( hu_solver_wb     [d] ),
+    .hu_op_byp_wb_d_i      ( hu_op_byp_wb     [d] ),
+    .hu_data_byp_wb_d_i    ( hu_data_byp_wb   [d] ),
 
     // To Hazard Unit
     .hu_rs1_d_o            ( hu_rs1           [d] ),
@@ -284,15 +290,23 @@ module mist_core(
     .hu_stall_e_i          ( hu_stall         [e] ),
     .hu_flush_e_i          ( hu_flush         [e] ),
 
-    .hu_solver_e_i         ( hu_solver        [e] ),
-    .hu_op_byp_e_i         ( hu_op_byp        [e] ),
-    .hu_data_byp_e_i       ( hu_data_byp      [e] ),
+    .hu_solver_m_e_i       ( hu_solver_m      [e] ),
+    .hu_solver_lsu_e_i     ( hu_solver_lsu    [e] ),
+    .hu_op_byp_m_e_i       ( hu_op_byp_m      [e] ),
+    .hu_data_byp_m_e_i     ( hu_data_byp_m    [e] ),
+
+    .hu_solver_wb_e_i      ( hu_solver_wb     [e] ),
+    .hu_op_byp_wb_e_i      ( hu_op_byp_wb     [e] ),
+    .hu_data_byp_wb_e_i    ( hu_data_byp_wb   [e] ),
 
     // To Hazard Unit
     .hu_rs1_e_o            ( hu_rs1           [e] ),
     .hu_rs2_e_o            ( hu_rs2           [e] ),
 
     .hu_flush_req_e_o      ( hu_flush_req     [e] ),
+
+    .hu_mem_req_e_o        ( hu_mem_req       [e] ),
+    .hu_mem_we_e_o         ( hu_mem_we        [e] ),
 
     .hu_use_rs1_e_o        ( hu_use_rs1       [e] ),
     .hu_use_rs2_e_o        ( hu_use_rs2       [e] ),
@@ -402,6 +416,9 @@ module mist_core(
     .hu_rs1_e_i            ( hu_rs1           [e] ),
     .hu_rs2_e_i            ( hu_rs2           [e] ),
 
+    .hu_mem_req_e_i        ( hu_mem_req       [e] ),
+    .hu_mem_we_e_i         ( hu_mem_we        [e] ),
+
     .hu_use_rs1_e_i        ( hu_use_rs1       [e] ),
     .hu_use_rs2_e_i        ( hu_use_rs2       [e] ),
 
@@ -419,14 +436,19 @@ module mist_core(
     .hu_gpr_we_wb_i        ( hu_gpr_we        [w] ),
 
     // To decode stage
-    .hu_solver_d_o         ( hu_solver        [d] ),
-    .hu_op_byp_d_o         ( hu_op_byp        [d] ),
-    .hu_data_byp_d_o       ( hu_data_byp      [d] ),
+    .hu_solver_wb_d_o      ( hu_solver_wb     [d] ),
+    .hu_op_byp_wb_d_o      ( hu_op_byp_wb     [d] ),
+    .hu_data_byp_wb_d_o    ( hu_data_byp_wb   [d] ),
 
     // To execute stage
-    .hu_solver_e_o         ( hu_solver        [e] ),
-    .hu_op_byp_e_o         ( hu_op_byp        [e] ),
-    .hu_data_byp_e_o       ( hu_data_byp      [e] ),
+    .hu_solver_m_e_o       ( hu_solver_m      [e] ),
+    .hu_solver_lsu_e_o     ( hu_solver_lsu    [e] ),
+    .hu_op_byp_m_e_o       ( hu_op_byp_m      [e] ),
+    .hu_data_byp_m_e_o     ( hu_data_byp_m    [e] ),
+
+    .hu_solver_wb_e_o      ( hu_solver_wb     [e] ),
+    .hu_op_byp_wb_e_o      ( hu_op_byp_wb     [e] ),
+    .hu_data_byp_wb_e_o    ( hu_data_byp_wb   [e] ),
 
     // Control signals
     .hu_stall_req_f_i      ( 1'd0                 ), // TODO: These stages can't send stall request yet

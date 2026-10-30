@@ -25,9 +25,9 @@ module mist_decode_stage(
   input  logic        hu_stall_d_i,
   input  logic        hu_flush_d_i,
 
-  input  logic        hu_solver_d_i,
-  input  logic        hu_op_byp_d_i,
-  input  logic [31:0] hu_data_byp_d_i,
+  input  logic        hu_solver_wb_d_i,
+  input  logic        hu_op_byp_wb_d_i,
+  input  logic [31:0] hu_data_byp_wb_d_i,
 
   // To Hazard Unit
   output logic [4:0]  hu_rs1_d_o,
@@ -221,7 +221,7 @@ module mist_decode_stage(
 
   always_comb begin
     case( alu_op_a_sel )
-      OP_A_RS1:     op_a = ( ( hu_solver_d_i ) && !( hu_op_byp_d_i ) ) ? ( hu_data_byp_d_i ) : ( gpr_rd_data1 );
+      OP_A_RS1:     op_a = ( ( hu_solver_wb_d_i ) && !( hu_op_byp_wb_d_i ) ) ? ( hu_data_byp_wb_d_i ) : ( gpr_rd_data1 );
       OP_A_CURR_PC: op_a = pc_cur_f_i;
       default:      op_a = 32'd0;
     endcase
@@ -229,11 +229,11 @@ module mist_decode_stage(
 
   always_comb begin
     case( alu_op_b_sel )
-      OP_B_RS2:   op_b = ( ( hu_solver_d_i ) && ( hu_op_byp_d_i ) ) ? ( hu_data_byp_d_i ) : ( gpr_rd_data2 );
-      OP_B_INCR:  op_b = 32'd4;
-      OP_B_IMM_I: op_b = imm_i;
-      OP_B_IMM_U: op_b = imm_u;
-      OP_B_IMM_S: op_b = imm_s;
+      OP_B_RS2:     op_b = ( ( hu_solver_wb_d_i ) &&  ( hu_op_byp_wb_d_i ) ) ? ( hu_data_byp_wb_d_i ) : ( gpr_rd_data2 );
+      OP_B_INCR:    op_b = 32'd4;
+      OP_B_IMM_I:   op_b = imm_i;
+      OP_B_IMM_U:   op_b = imm_u;
+      OP_B_IMM_S:   op_b = imm_s;
     endcase
   end
 
@@ -309,7 +309,7 @@ module mist_decode_stage(
       lsu_req_d_o      <= lsu_req;
       lsu_we_d_o       <= lsu_we;
       lsu_size_d_o     <= lsu_size;
-      lsu_wd_d_o       <= gpr_rd_data2;
+      lsu_wd_d_o       <= gpr_rd_data2; // TODO: Can be broken
       alu_op_d_o       <= alu_op;
       mret_d_o         <= mret;
       wb_sel_d_o       <= wb_sel;

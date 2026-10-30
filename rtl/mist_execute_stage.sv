@@ -41,15 +41,23 @@ module mist_execute_stage(
   input  logic        hu_stall_e_i,
   input  logic        hu_flush_e_i,
 
-  input  logic        hu_solver_e_i,
-  input  logic        hu_op_byp_e_i,
-  input  logic [31:0] hu_data_byp_e_i,
+  input  logic        hu_solver_m_e_i,
+  input  logic [1:0]  hu_solver_lsu_e_i,
+  input  logic        hu_op_byp_m_e_i,
+  input  logic [31:0] hu_data_byp_m_e_i,
+
+  input  logic        hu_solver_wb_e_i,
+  input  logic        hu_op_byp_wb_e_i,
+  input  logic [31:0] hu_data_byp_wb_e_i,
 
   // To Hazard Unit
   output logic [4:0]  hu_rs1_e_o,
   output logic [4:0]  hu_rs2_e_o,
 
   output logic        hu_flush_req_e_o,
+
+  output logic        hu_mem_req_e_o,
+  output logic        hu_mem_we_e_o,
 
   output logic        hu_use_rs1_e_o,
   output logic        hu_use_rs2_e_o,
@@ -81,6 +89,13 @@ module mist_execute_stage(
   output logic [1:0]  wb_sel_e_o
 );
 
+  // Choosing lsu_wd logic
+  logic [31:0] lsu_wd;
+
+  assign lsu_wd = ( hu_solver_lsu_e_i[0] ) ? ( hu_data_byp_m_e_i  ):
+                  ( hu_solver_lsu_e_i[1] ) ? ( hu_data_byp_wb_e_i ):
+                                             ( lsu_wd_d_i         );
+
   // ALU logic
   logic [31:0] op_a;
   logic [31:0] op_b;
@@ -88,8 +103,12 @@ module mist_execute_stage(
   logic [31:0] alu_result;
   logic        alu_flag;
 
-  assign op_a = ( ( hu_solver_e_i ) && !( hu_op_byp_e_i ) ) ? ( hu_data_byp_e_i ) : ( op_a_d_i );
-  assign op_b = ( ( hu_solver_e_i ) &&  ( hu_op_byp_e_i ) ) ? ( hu_data_byp_e_i ) : ( op_b_d_i );
+  assign op_a = ( ( hu_solver_m_e_i  ) && !( hu_op_byp_m_e_i  ) ) ? ( hu_data_byp_m_e_i  ):
+                ( ( hu_solver_wb_e_i ) && !( hu_op_byp_wb_e_i ) ) ? ( hu_data_byp_wb_e_i ):
+                                                                    ( op_a_d_i           );
+  assign op_b = ( ( hu_solver_m_e_i  ) &&  ( hu_op_byp_m_e_i  ) ) ? ( hu_data_byp_m_e_i  ):
+                ( ( hu_solver_wb_e_i ) &&  ( hu_op_byp_wb_e_i ) ) ? ( hu_data_byp_wb_e_i ):
+                                                                    ( op_b_d_i           );
 
   mist_alu e_alu(
     .op_a_i   ( op_a       ),
@@ -129,6 +148,9 @@ module mist_execute_stage(
   assign hu_rs2_e_o       = gpr_rs2_addr_d_i;
 
   assign hu_flush_req_e_o = hu_flush_req;
+
+  assign hu_mem_req_e_o   = lsu_req_d_i;
+  assign hu_mem_we_e_o    = lsu_we_d_i;
 
   assign hu_use_rs1_e_o   = use_rs1_d_i;
   assign hu_use_rs2_e_o   = use_rs2_d_i;
@@ -172,7 +194,7 @@ module mist_execute_stage(
       lsu_req_e_o       <= lsu_req_d_i;
       lsu_we_e_o        <= lsu_we_d_i;
       lsu_size_e_o      <= lsu_size_d_i;
-      lsu_wd_e_o        <= lsu_wd_d_i;
+      lsu_wd_e_o        <= lsu_wd;
       gpr_we_e_o        <= gpr_we_d_i;
       mret_e_o          <= mret_d_i;
       wb_sel_e_o        <= wb_sel_d_i;
