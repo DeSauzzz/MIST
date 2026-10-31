@@ -21,9 +21,6 @@ module mist_hu(
   input  logic [4:0]  hu_rs1_d_i,
   input  logic [4:0]  hu_rs2_d_i,
 
-  input  logic [1:0]  hu_op_a_sel_d_i,
-  input  logic [2:0]  hu_op_b_sel_d_i,
-
   input  logic        hu_use_rs1_d_i,
   input  logic        hu_use_rs2_d_i,
 
@@ -52,18 +49,21 @@ module mist_hu(
 
   // To decode stage
   output logic        hu_solver_wb_d_o,
-  output logic        hu_op_byp_wb_d_o,   // 0 - bypass data to RD1 register; 1 - bypass data to RD2 register
+  output logic        hu_op1_byp_wb_d_o,
+  output logic        hu_op2_byp_wb_d_o,
   output logic [31:0] hu_data_byp_wb_d_o,
 
   // To execute stage
   output logic        hu_solver_m_e_o,
   output logic [1:0]  hu_solver_lsu_e_o,
-  output logic        hu_op_byp_m_e_o,    // 0 - bypass data to a operand; 1 - bypass data to b operand
+  output logic        hu_op1_byp_m_e_o,
+  output logic        hu_op2_byp_m_e_o,
   output logic [31:0] hu_data_byp_m_e_o,
 
   output logic        hu_solver_wb_e_o,
-  output logic        hu_op_byp_wb_e_o,
-  output logic [31:0] hu_data_byp_wb_e_o, // 0 - bypass data to a operand; 1 - bypass data to b operand
+  output logic        hu_op1_byp_wb_e_o,
+  output logic        hu_op2_byp_wb_e_o,
+  output logic [31:0] hu_data_byp_wb_e_o,
 
   // Control signals
   input  logic        hu_stall_req_f_i,
@@ -101,36 +101,18 @@ module mist_hu(
   assign hu_flush_e_o = 1'd0;
   assign hu_flush_m_o = 1'd0;
 
-  // Delay for op_*_sel
-  logic [1:0] op_a_sel_d_dly_ff;
-  logic [2:0] op_b_sel_d_dly_ff;
-
-  always_ff @( posedge clk_i ) begin
-    if( !rstn_i )
-      op_a_sel_d_dly_ff <= 2'd0;
-    else if( !stall_req )
-      op_a_sel_d_dly_ff <= hu_op_a_sel_d_i;
-  end
-
-  always_ff @( posedge clk_i ) begin
-    if( !rstn_i )
-      op_b_sel_d_dly_ff <= 3'd0;
-    else if( !stall_req )
-      op_b_sel_d_dly_ff <= hu_op_b_sel_d_i;
-  end
-
   // Hazard identification
   logic [1:0] hu_em_mem_raw;  // Potential memory operation RAW hazard between execute and memory stages
   logic [1:0] hu_em_comp_raw; // Potential computing operation RAW hazard between execute and memory stages
   logic [1:0] hu_ewb_raw;     // Potential RAW hazard between execute and writeback stages
   logic       hu_dwb_raw;     // Potential RAW hazard between decode and writeback stages
 
-  assign hu_em_mem_raw [0] = ( ( ( hu_wa_m_i == hu_rs1_e_i )  &&  ( hu_wa_m_i != 5'd0 ) && ( hu_use_rs1_e_i ) ) && ( op_a_sel_d_dly_ff == OP_A_RS1 )   ||
-                               ( ( hu_wa_m_i == hu_rs2_e_i )  &&  ( hu_wa_m_i != 5'd0 ) && ( hu_use_rs2_e_i ) ) && ( op_b_sel_d_dly_ff == OP_B_RS2 ) ) &&
+  assign hu_em_mem_raw [0] = ( ( ( hu_wa_m_i == hu_rs1_e_i )  &&  ( hu_wa_m_i != 5'd0 ) && ( hu_use_rs1_e_i ) )   ||
+                               ( ( hu_wa_m_i == hu_rs2_e_i )  &&  ( hu_wa_m_i != 5'd0 ) && ( hu_use_rs2_e_i ) ) ) &&
                                ( hu_mem_req_m_i            )  && !( hu_mem_we_m_i );
 
-  assign hu_em_comp_raw[0] = ( ( ( hu_wa_m_i == hu_rs1_e_i )  &&  ( hu_wa_m_i != 5'd0 ) && ( hu_use_rs1_e_i ) ) && ( op_a_sel_d_dly_ff == OP_A_RS1 )   ||
-                               ( ( hu_wa_m_i == hu_rs2_e_i )  &&  ( hu_wa_m_i != 5'd0 ) && ( hu_use_rs2_e_i ) ) && ( op_b_sel_d_dly_ff == OP_B_RS2 ) ) &&
+  assign hu_em_comp_raw[0] = ( ( ( hu_wa_m_i == hu_rs1_e_i )  &&  ( hu_wa_m_i != 5'd0 ) && ( hu_use_rs1_e_i ) )   ||
+                               ( ( hu_wa_m_i == hu_rs2_e_i )  &&  ( hu_wa_m_i != 5'd0 ) && ( hu_use_rs2_e_i ) ) ) &&
                               !( hu_mem_req_m_i            )  && !( hu_mem_we_m_i );
 
   assign hu_em_mem_raw [1] = ( ( hu_wa_m_i == hu_rs2_e_i ) && ( hu_wa_m_i != 5'd0 ) && ( hu_use_rs2_e_i ) ) &&  ( hu_mem_req_e_i ) &&  ( hu_mem_we_e_i )
@@ -138,12 +120,12 @@ module mist_hu(
   assign hu_em_comp_raw[1] = ( ( hu_wa_m_i == hu_rs2_e_i ) && ( hu_wa_m_i != 5'd0 ) && ( hu_use_rs2_e_i ) ) &&  ( hu_mem_req_e_i ) &&  ( hu_mem_we_e_i )
                                                                                                             && !( hu_mem_req_m_i ) && !( hu_mem_we_m_i );
 
-  assign hu_ewb_raw    [0] = ( ( hu_wa_wb_i == hu_rs1_e_i ) && ( hu_wa_wb_i != 5'd0 ) && ( hu_use_rs1_e_i ) ) && ( op_a_sel_d_dly_ff == OP_A_RS1 ) ||
-                             ( ( hu_wa_wb_i == hu_rs2_e_i ) && ( hu_wa_wb_i != 5'd0 ) && ( hu_use_rs2_e_i ) ) && ( op_b_sel_d_dly_ff == OP_B_RS2 );
+  assign hu_ewb_raw    [0] = ( ( hu_wa_wb_i == hu_rs1_e_i ) && ( hu_wa_wb_i != 5'd0 ) && ( hu_use_rs1_e_i ) ) ||
+                             ( ( hu_wa_wb_i == hu_rs2_e_i ) && ( hu_wa_wb_i != 5'd0 ) && ( hu_use_rs2_e_i ) );
   assign hu_ewb_raw    [1] = ( ( hu_wa_wb_i == hu_rs2_e_i ) && ( hu_wa_wb_i != 5'd0 ) && ( hu_use_rs2_e_i ) ) && ( hu_mem_req_e_i ) && ( hu_mem_we_e_i );
 
-  assign hu_dwb_raw        = ( ( hu_wa_wb_i == hu_rs1_d_i ) && ( hu_wa_wb_i != 5'd0 ) && ( hu_use_rs1_d_i ) ) && ( hu_op_a_sel_d_i   == OP_A_RS1 ) ||
-                             ( ( hu_wa_wb_i == hu_rs2_d_i ) && ( hu_wa_wb_i != 5'd0 ) && ( hu_use_rs2_d_i ) ) && ( hu_op_b_sel_d_i   == OP_B_RS2 );
+  assign hu_dwb_raw        = ( ( hu_wa_wb_i == hu_rs1_d_i ) && ( hu_wa_wb_i != 5'd0 ) && ( hu_use_rs1_d_i ) ) ||
+                             ( ( hu_wa_wb_i == hu_rs2_d_i ) && ( hu_wa_wb_i != 5'd0 ) && ( hu_use_rs2_d_i ) );
 
   // Hazard acknowledgment
   logic [1:0] hu_em_mem_raw_ack;  // Acknowledgment memory operation RAW hazard between execute and memory stages
@@ -162,7 +144,8 @@ module mist_hu(
   // Hazard resolution for decode stage
   assign hu_solver_wb_d_o      = ( hu_dwb_raw_ack );
   assign hu_data_byp_wb_d_o    = ( hu_wb_data_wb_i );
-  assign hu_op_byp_wb_d_o      = ( ( hu_wa_wb_i == hu_rs2_d_i ) && ( hu_op_b_sel_d_i == OP_B_RS2 ) );
+  assign hu_op1_byp_wb_d_o     = ( ( hu_wa_wb_i == hu_rs1_d_i ) ) && ( hu_use_rs1_d_i );
+  assign hu_op2_byp_wb_d_o     = ( ( hu_wa_wb_i == hu_rs2_d_i ) ) && ( hu_use_rs2_d_i );
 
   // Hazard resolution for execute stage
   assign hu_solver_m_e_o       = ( hu_em_mem_raw_ack[0] ) || ( hu_em_comp_raw_ack[0] );
@@ -176,7 +159,10 @@ module mist_hu(
   assign hu_solver_lsu_e_o[1]  = ( hu_ewb_raw_ack[1] );
   assign hu_data_byp_wb_e_o    = ( hu_wb_data_wb_i   );
 
-  assign hu_op_byp_m_e_o       = ( ( hu_wa_m_i  == hu_rs2_e_i ) && ( op_b_sel_d_dly_ff == OP_B_RS2 ) );
-  assign hu_op_byp_wb_e_o      = ( ( hu_wa_wb_i == hu_rs2_e_i ) && ( op_b_sel_d_dly_ff == OP_B_RS2 ) );
+  assign hu_op1_byp_m_e_o      = ( ( hu_wa_m_i  == hu_rs1_e_i ) ) && ( hu_use_rs1_e_i );
+  assign hu_op2_byp_m_e_o      = ( ( hu_wa_m_i  == hu_rs2_e_i ) ) && ( hu_use_rs2_e_i );
+
+  assign hu_op1_byp_wb_e_o     = ( ( hu_wa_wb_i == hu_rs1_e_i ) ) && ( hu_use_rs1_e_i);
+  assign hu_op2_byp_wb_e_o     = ( ( hu_wa_wb_i == hu_rs2_e_i ) ) && ( hu_use_rs2_e_i );
 
 endmodule

@@ -43,11 +43,13 @@ module mist_execute_stage(
 
   input  logic        hu_solver_m_e_i,
   input  logic [1:0]  hu_solver_lsu_e_i,
-  input  logic        hu_op_byp_m_e_i,
+  input  logic        hu_op1_byp_m_e_i,
+  input  logic        hu_op2_byp_m_e_i,
   input  logic [31:0] hu_data_byp_m_e_i,
 
   input  logic        hu_solver_wb_e_i,
-  input  logic        hu_op_byp_wb_e_i,
+  input  logic        hu_op1_byp_wb_e_i,
+  input  logic        hu_op2_byp_wb_e_i,
   input  logic [31:0] hu_data_byp_wb_e_i,
 
   // To Hazard Unit
@@ -103,11 +105,11 @@ module mist_execute_stage(
   logic [31:0] alu_result;
   logic        alu_flag;
 
-  assign op_a = ( ( hu_solver_m_e_i  ) && !( hu_op_byp_m_e_i  ) ) ? ( hu_data_byp_m_e_i  ):
-                ( ( hu_solver_wb_e_i ) && !( hu_op_byp_wb_e_i ) ) ? ( hu_data_byp_wb_e_i ):
+  assign op_a = ( ( hu_solver_m_e_i  ) && ( hu_op1_byp_m_e_i  ) ) ? ( hu_data_byp_m_e_i  ):
+                ( ( hu_solver_wb_e_i ) && ( hu_op1_byp_wb_e_i ) ) ? ( hu_data_byp_wb_e_i ):
                                                                     ( op_a_d_i           );
-  assign op_b = ( ( hu_solver_m_e_i  ) &&  ( hu_op_byp_m_e_i  ) ) ? ( hu_data_byp_m_e_i  ):
-                ( ( hu_solver_wb_e_i ) &&  ( hu_op_byp_wb_e_i ) ) ? ( hu_data_byp_wb_e_i ):
+  assign op_b = ( ( hu_solver_m_e_i  ) && ( hu_op2_byp_m_e_i  ) ) ? ( hu_data_byp_m_e_i  ):
+                ( ( hu_solver_wb_e_i ) && ( hu_op2_byp_wb_e_i ) ) ? ( hu_data_byp_wb_e_i ):
                                                                     ( op_b_d_i           );
 
   mist_alu e_alu(
