@@ -59,12 +59,16 @@ module mist_lsu(
     endcase
   end
 
+  logic [31:0] lsu_rd_shifted;
+
+  assign lsu_rd_shifted = ( lsu_rd_ff >> { lsu_addr_i[1:0], 3'd0 } );
+
   always_comb begin
     case( lsu_size_i )
-      MEM_BYTE:   lsu_rd_o = { { 24{lsu_rd_ff[7]}  }, lsu_rd_ff[7:0]  };
-      MEM_BYTE_U: lsu_rd_o = { 24'd0, lsu_rd_ff[7:0]  };
-      MEM_HALF:   lsu_rd_o = { { 16{lsu_rd_ff[15]} }, lsu_rd_ff[15:0] };
-      MEM_HALF_U: lsu_rd_o = { 16'd0, lsu_rd_ff[15:0] };
+      MEM_BYTE:   lsu_rd_o = { { 24{lsu_rd_shifted[7]}  }, lsu_rd_shifted[7:0]  };
+      MEM_BYTE_U: lsu_rd_o = { 24'd0, lsu_rd_shifted[7:0]  };
+      MEM_HALF:   lsu_rd_o = { { 16{lsu_rd_shifted[15]} }, lsu_rd_shifted[15:0] };
+      MEM_HALF_U: lsu_rd_o = { 16'd0, lsu_rd_shifted[15:0] };
       MEM_WORD:   lsu_rd_o = lsu_rd_ff;
       default:    lsu_rd_o = 32'd0;
     endcase
