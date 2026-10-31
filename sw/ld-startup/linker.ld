@@ -2,61 +2,58 @@ ENTRY(_start)
 
 MEMORY
 {
-    instr_mem (rw) : ORIGIN = 0x80000400, LENGTH = 1k
-    data_mem  (rwx): ORIGIN = 0x80000800, LENGTH = 2k
+    instr_mem (rw) : ORIGIN = 0x00000000, LENGTH = 64K
+    data_mem  (rwx): ORIGIN = 0x00000000, LENGTH = 16K - 256
 }
+
+_stack_size = 2048;
 
 SECTIONS
 {
     .text :
     {
-        . = ALIGN(4);
         _stext = .;
 
         PROVIDE(_start = .);
-        *(.text)
-        *(.text.*)
+        *(.boot)
+        *(.text .text.*)
 
-        . = ALIGN(4);
         _etext = .;
     } > instr_mem
 
-    .rodata :
+    .data : AT (0x80000000)
     {
-        . = ALIGN(4);
-
-        *(.rodata)
-        *(.rodata.*)
-
-        . = ALIGN(4);
-    } > instr_mem
-
-    .data :
-    {
-        . = ALIGN(4);
+        . += 16;
+        _gbl_ptr = . + 2048;
 
        _sdata = .;
 
-       *(.data)
-       *(.data.*)
+       *(.*data*)
 
        _edata = .;
     } > data_mem
 
+    . = ALIGN(4);
+
+    _bss_start = .;
     .bss :
     {
-        . = ALIGN(4);
 
         _sbss = .;
 
-        *(.bss)
-        *(.bss.*)
+        *(.bss .bss.*)
+        *(.sbss .sbss.*)
         *(COMMON)
 
         _ebss = .;
 
-        . = ALIGN(4);
     } > data_mem
+    _bss_end = .;
 
-    _stack_top = ORIGIN(data_mem) + LENGTH(data_mem);
+    .stack (NOLOAD) :
+    {
+        . = ALIGN(16);
+        . += _stack_size;
+        _stack_top = .;
+    } > data_mem
 }
