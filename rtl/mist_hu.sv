@@ -51,7 +51,6 @@ module mist_hu(
   output logic        hu_solver_wb_d_o,
   output logic        hu_op1_byp_wb_d_o,
   output logic        hu_op2_byp_wb_d_o,
-  output logic [31:0] hu_data_byp_wb_d_o,
 
   // To execute stage
   output logic        hu_solver_m_e_o,
@@ -143,7 +142,6 @@ module mist_hu(
 
   // Hazard resolution for decode stage
   assign hu_solver_wb_d_o      = ( hu_dwb_raw_ack );
-  assign hu_data_byp_wb_d_o    = ( hu_wb_data_wb_i );
   assign hu_op1_byp_wb_d_o     = ( ( hu_wa_wb_i == hu_rs1_d_i ) ) && ( hu_use_rs1_d_i );
   assign hu_op2_byp_wb_d_o     = ( ( hu_wa_wb_i == hu_rs2_d_i ) ) && ( hu_use_rs2_d_i );
 

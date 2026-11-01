@@ -1,6 +1,10 @@
 module mist_gpr(
   input  logic        clk_i,
 
+  input  logic        hu_solver_i,
+  input  logic        hu_op1_byp_i,
+  input  logic        hu_op2_byp_i,
+
   input  logic        wr_en_i,
 
   input  logic [4:0]  wr_addr_i,
@@ -22,7 +26,7 @@ module mist_gpr(
       rf_mem[wr_addr_i] <= wr_data_i;
   end
 
-  assign rd_data1_o = rf_mem[rd_addr1_i];
-  assign rd_data2_o = rf_mem[rd_addr2_i];
+  assign rd_data1_o = ( ( hu_solver_i ) && ( hu_op1_byp_i ) ) ? ( wr_data_i ) : ( rf_mem[rd_addr1_i] );
+  assign rd_data2_o = ( ( hu_solver_i ) && ( hu_op2_byp_i ) ) ? ( wr_data_i ) : ( rf_mem[rd_addr2_i] );
 
 endmodule

@@ -28,7 +28,6 @@ module mist_decode_stage(
   input  logic        hu_solver_wb_d_i,
   input  logic        hu_op1_byp_wb_d_i,
   input  logic        hu_op2_byp_wb_d_i,
-  input  logic [31:0] hu_data_byp_wb_d_i,
 
   // To Hazard Unit
   output logic [4:0]  hu_rs1_d_o,
@@ -186,19 +185,23 @@ module mist_decode_stage(
   assign gpr_wr_addr     = instr_f_i[11:7];
 
   mist_gpr d_gpr (
-    .clk_i      ( clk_i         ),
+    .clk_i        ( clk_i              ),
 
-    .wr_en_i    ( gpr_we_wb_i   ),
+    .hu_solver_i  ( hu_solver_wb_d_i  ),
+    .hu_op1_byp_i ( hu_op1_byp_wb_d_i ),
+    .hu_op2_byp_i ( hu_op2_byp_wb_d_i ),
 
-    .wr_addr_i  ( gpr_wa_wb_i   ),
+    .wr_en_i      ( gpr_we_wb_i       ),
 
-    .rd_addr1_i ( gpr_rs1_addr  ),
-    .rd_addr2_i ( gpr_rs2_addr  ),
+    .wr_addr_i    ( gpr_wa_wb_i       ),
 
-    .wr_data_i  ( gpr_wd_wb_i   ),
+    .rd_addr1_i   ( gpr_rs1_addr      ),
+    .rd_addr2_i   ( gpr_rs2_addr      ),
 
-    .rd_data1_o ( gpr_rd_data1  ),
-    .rd_data2_o ( gpr_rd_data2  )
+    .wr_data_i    ( gpr_wd_wb_i       ),
+
+    .rd_data1_o   ( gpr_rd_data1      ),
+    .rd_data2_o   ( gpr_rd_data2      )
   );
 
   // To Hazard Unit
@@ -214,7 +217,7 @@ module mist_decode_stage(
 
   always_comb begin
     case( alu_op_a_sel )
-      OP_A_RS1:     op_a = ( ( hu_solver_wb_d_i ) && ( hu_op1_byp_wb_d_i ) ) ? ( hu_data_byp_wb_d_i ) : ( gpr_rd_data1 );
+      OP_A_RS1:     op_a = gpr_rd_data1;
       OP_A_CURR_PC: op_a = pc_cur_f_i;
       default:      op_a = 32'd0;
     endcase
@@ -222,7 +225,7 @@ module mist_decode_stage(
 
   always_comb begin
     case( alu_op_b_sel )
-      OP_B_RS2:     op_b = ( ( hu_solver_wb_d_i ) && ( hu_op2_byp_wb_d_i ) ) ? ( hu_data_byp_wb_d_i ) : ( gpr_rd_data2 );
+      OP_B_RS2:     op_b = gpr_rd_data2;
       OP_B_INCR:    op_b = 32'd4;
       OP_B_IMM_I:   op_b = imm_i;
       OP_B_IMM_U:   op_b = imm_u;
