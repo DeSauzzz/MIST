@@ -34,8 +34,6 @@ module mist_decode_stage(
   output logic [4:0]  hu_rs1_d_o,
   output logic [4:0]  hu_rs2_d_o,
 
-  output logic [4:0]  hu_opcode_d_o,
-
   output logic        hu_use_rs1_d_o,
   output logic        hu_use_rs2_d_o,
 

@@ -40,9 +40,9 @@ module mist_alu(
       case( alu_op_i )
         ALU_EQ:  flag_o = ( op_a_i == op_b_i );
         ALU_NE:  flag_o = ( op_a_i != op_b_i );
-        ALU_LT:  flag_o = ( op_a_i <  op_b_i );
-        ALU_GE:  flag_o = ( op_a_i >  op_b_i );
-        ALU_LTU: flag_o = ( op_a_i <= op_b_i );
+        ALU_LT:  flag_o = ( $signed(op_a_i) <   $signed(op_b_i) );
+        ALU_GE:  flag_o = ( $signed(op_a_i) >=  $signed(op_b_i) );
+        ALU_LTU: flag_o = ( op_a_i < op_b_i  );
         ALU_GEU: flag_o = ( op_a_i >= op_b_i );
         default: flag_o = 1'd0;
       endcase
