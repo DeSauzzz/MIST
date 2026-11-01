@@ -25,7 +25,7 @@ module mist_alu(
         ALU_AND:  result_o = op_a_i &    op_b_i;
         ALU_SLL:  result_o = op_a_i <<   op_b_i[4:0];
         ALU_SRL:  result_o = op_a_i >>   op_b_i[4:0];
-        ALU_SRA:  result_o = op_a_i >>>  op_b_i[4:0];
+        ALU_SRA:  result_o = $signed(op_a_i) >>>  op_b_i[4:0];
         ALU_SLT:  result_o = { 30'd0, $signed(op_a_i) < $signed(op_b_i) };
         ALU_SLTU: result_o = { 30'd0, op_a_i < op_b_i                   };
         default:  result_o = 32'd0;
