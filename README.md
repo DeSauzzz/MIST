@@ -1,6 +1,8 @@
 # MIST
 The development of this processor core was inspired by the "[Architectures of Computing Systems](https://github.com/MPSU/APS/tree/english_version)" (APS) course taught at MIET, as well as by an open-source core [MIRISCV](https://github.com/MPSU/MIRISCV).
 
+![Схема MIST](img/mist_rv32i.png)
+
 ## Main features
 * 5-stages pipeline (Fetch, Decode, Execute, Memory, Writeback);
 * Support for ISA RV32I;
@@ -41,9 +43,63 @@ MIST/
 * **coremark** - MIST platform for building CoreMark;
 * **riscv-tests** -  directed tests for each instruction.
 
+## System Requirements
+
+This section contain information about OS and tools that was used during the development process.
+* **OS:** Ubuntu 24.04.5 LTS
+* **Vivado:** Version 2022.1
+* **RISC-V Toolchain:** Version 16.1.0
+
 ## How to build
 
-TODO
+First of all you need to install [RISC-V Toolchain](https://github.com/riscv-collab/riscv-gnu-toolchain) and only after successful installation you can go to the next steps.
+
+Clone this repository and submodules which are used
+```bash
+git clone https://github.com/DeSauzzz/MIST.git
+cd MIST
+git submodule update --recursive --init
+```
+After that you can use memory files that included in the repository for run CoreMark. If you want to build CoreMark and riscv-tests yourself you need to follow the steps described below.
+
+### Generating tests for each instruction
+The [riscv-tests](https://github.com/riscv-software-src/riscv-tests) was used for this purpose. All the rules for MIST System can be found at the path `/sw/verif/riscv-tests`. You need to go to that directory and use Makefile for tests generation. The list of supported tests you can find in the Makefile under the variable **TESTS**.
+* If you want to build all of the supported tests, run command provided below
+```bash
+make all
+```
+* If you want to build specific test
+```bash
+make TESTS=<test name>
+```
+
+After test generation you can find instruction and data memory files in the build directory. Specify the path to these files in variables `INIT_DMEM` and `INIT_IMEM` of the module `mist_system` and after that run simulation. You will see this string if the test passes `RESULT: PASS`.
+
+### CoreMark build
+If you want to build CoreMark yourself, follow the steps described below.
+1. Go to the `sw/coremark` directory.
+2. Run one of the command provided below:
+```bash
+# If you want to build CoreMark for performance run
+make PORT_DIR=../../verif/coremark/ ITERATIONS=1 XCFLAGS="-DPERFORMANCE_RUN=1" REBUILD=1 link
+# If you want to build CoreMark for validation run
+make PORT_DIR=../../verif/coremark/ ITERATIONS=1 XCFLAGS="-DVALIDATION_RUN=1" REBUILD=1 link
+```
+The results is .elf file that can be converted to memory files.
+3. Run this command for generation binary file with instruction memory:
+```bash
+riscv64-unknown-elf-objcopy -O binary -j .text coremark.elf instr.bin
+```
+4. Run this command for generation binary file with data memory:
+```bash
+riscv64-unknown-elf-objcopy -O binary -j .data coremark.elf data.bin
+```
+5. Convert instr.bin and data.bin to .dat format:
+```bash
+xxd -p -c 4 instr.bin | sed 's/\(..\)\(..\)\(..\)\(..\)/\4\3\2\1/' > instr.dat
+xxd -p -c 4 data.bin | sed 's/\(..\)\(..\)\(..\)\(..\)/\4\3\2\1/' > data.dat
+```
+6. Use the resulting files in the simulation.
 
 ## CoreMark
 
