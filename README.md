@@ -81,9 +81,9 @@ If you want to build CoreMark yourself, follow the steps described below.
 2. Run one of the command provided below:
 ```bash
 # If you want to build CoreMark for performance run
-make PORT_DIR=../../verif/coremark/ ITERATIONS=1 XCFLAGS="-DPERFORMANCE_RUN=1" REBUILD=1 link
+make PORT_DIR=../verif/coremark/ ITERATIONS=1 XCFLAGS="-DPERFORMANCE_RUN=1" REBUILD=1 link
 # If you want to build CoreMark for validation run
-make PORT_DIR=../../verif/coremark/ ITERATIONS=1 XCFLAGS="-DVALIDATION_RUN=1" REBUILD=1 link
+make PORT_DIR=../verif/coremark/ ITERATIONS=1 XCFLAGS="-DVALIDATION_RUN=1" REBUILD=1 link
 ```
 The results is .elf file that can be converted to memory files.
 3. Run this command for generation binary file with instruction memory:
