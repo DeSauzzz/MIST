@@ -106,12 +106,12 @@ module mist_hu(
   logic [1:0] hu_ewb_raw;     // Potential RAW hazard between execute and writeback stages
   logic       hu_dwb_raw;     // Potential RAW hazard between decode and writeback stages
 
-  assign hu_em_mem_raw [0] = ( ( ( hu_wa_m_i == hu_rs1_e_i )  &&  ( hu_wa_m_i != 5'd0 ) && ( hu_use_rs1_e_i ) )   ||
-                               ( ( hu_wa_m_i == hu_rs2_e_i )  &&  ( hu_wa_m_i != 5'd0 ) && ( hu_use_rs2_e_i ) ) ) &&
+  assign hu_em_mem_raw [0] = ( ( ( hu_wa_m_i == hu_rs1_e_i )  &&  ( hu_wa_m_i != 5'd0 ) && ( hu_use_rs1_e_i ) )                         ||
+                               ( ( hu_wa_m_i == hu_rs2_e_i )  &&  ( hu_wa_m_i != 5'd0 ) && ( hu_use_rs2_e_i ) ) && !( hu_mem_we_e_i ) ) &&
                                ( hu_mem_req_m_i            )  && !( hu_mem_we_m_i );
 
-  assign hu_em_comp_raw[0] = ( ( ( hu_wa_m_i == hu_rs1_e_i )  &&  ( hu_wa_m_i != 5'd0 ) && ( hu_use_rs1_e_i ) )   ||
-                               ( ( hu_wa_m_i == hu_rs2_e_i )  &&  ( hu_wa_m_i != 5'd0 ) && ( hu_use_rs2_e_i ) ) ) &&
+  assign hu_em_comp_raw[0] = ( ( ( hu_wa_m_i == hu_rs1_e_i )  &&  ( hu_wa_m_i != 5'd0 ) && ( hu_use_rs1_e_i ) )                         ||
+                               ( ( hu_wa_m_i == hu_rs2_e_i )  &&  ( hu_wa_m_i != 5'd0 ) && ( hu_use_rs2_e_i ) ) && !( hu_mem_we_e_i ) ) &&
                               !( hu_mem_req_m_i            )  && !( hu_mem_we_m_i );
 
   assign hu_em_mem_raw [1] = ( ( hu_wa_m_i == hu_rs2_e_i ) && ( hu_wa_m_i != 5'd0 ) && ( hu_use_rs2_e_i ) ) &&  ( hu_mem_req_e_i ) &&  ( hu_mem_we_e_i )
@@ -120,8 +120,8 @@ module mist_hu(
                                                                                                             && !( hu_mem_req_m_i ) && !( hu_mem_we_m_i );
 
   assign hu_ewb_raw    [0] = ( ( hu_wa_wb_i == hu_rs1_e_i ) && ( hu_wa_wb_i != 5'd0 ) && ( hu_use_rs1_e_i ) ) ||
-                             ( ( hu_wa_wb_i == hu_rs2_e_i ) && ( hu_wa_wb_i != 5'd0 ) && ( hu_use_rs2_e_i ) );
-  assign hu_ewb_raw    [1] = ( ( hu_wa_wb_i == hu_rs2_e_i ) && ( hu_wa_wb_i != 5'd0 ) && ( hu_use_rs2_e_i ) ) && ( hu_mem_req_e_i ) && ( hu_mem_we_e_i );
+                             ( ( hu_wa_wb_i == hu_rs2_e_i ) && ( hu_wa_wb_i != 5'd0 ) && ( hu_use_rs2_e_i ) ) && !( hu_mem_we_e_i );
+  assign hu_ewb_raw    [1] = ( ( hu_wa_wb_i == hu_rs2_e_i ) && ( hu_wa_wb_i != 5'd0 ) && ( hu_use_rs2_e_i ) ) &&  ( hu_mem_req_e_i ) && ( hu_mem_we_e_i );
 
   assign hu_dwb_raw        = ( ( hu_wa_wb_i == hu_rs1_d_i ) && ( hu_wa_wb_i != 5'd0 ) && ( hu_use_rs1_d_i ) ) ||
                              ( ( hu_wa_wb_i == hu_rs2_d_i ) && ( hu_wa_wb_i != 5'd0 ) && ( hu_use_rs2_d_i ) );
@@ -160,7 +160,7 @@ module mist_hu(
   assign hu_op1_byp_m_e_o      = ( ( hu_wa_m_i  == hu_rs1_e_i ) ) && ( hu_use_rs1_e_i );
   assign hu_op2_byp_m_e_o      = ( ( hu_wa_m_i  == hu_rs2_e_i ) ) && ( hu_use_rs2_e_i );
 
-  assign hu_op1_byp_wb_e_o     = ( ( hu_wa_wb_i == hu_rs1_e_i ) ) && ( hu_use_rs1_e_i);
+  assign hu_op1_byp_wb_e_o     = ( ( hu_wa_wb_i == hu_rs1_e_i ) ) && ( hu_use_rs1_e_i );
   assign hu_op2_byp_wb_e_o     = ( ( hu_wa_wb_i == hu_rs2_e_i ) ) && ( hu_use_rs2_e_i );
 
 endmodule
