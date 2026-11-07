@@ -1,3 +1,6 @@
+// SPDX-License-Identifier: MIT
+// Copyright (c) 2026 Artem Matyukhin
+
 package mist_mem_pkg;
 
   localparam INSTR_MEM_BYTE_SIZE = 64 * 1024;

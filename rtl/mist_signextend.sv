@@ -1,3 +1,6 @@
+// SPDX-License-Identifier: MIT
+// Copyright (c) 2026 Artem Matyukhin
+
 module mist_signextend
  #(parameter IN_WIDTH  = 12,
    parameter OUT_WIDTH = 32)

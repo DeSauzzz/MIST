@@ -1,3 +1,6 @@
+// SPDX-License-Identifier: MIT
+// Copyright (c) 2026 Artem Matyukhin
+
 import mist_mem_pkg::DATA_MEM_BYTE_SIZE;
 import mist_mem_pkg::DATA_MEM_WORD_SIZE;
 

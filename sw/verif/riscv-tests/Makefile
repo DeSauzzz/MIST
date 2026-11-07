@@ -1,3 +1,6 @@
+# SPDX-License-Identifier: MIT
+# Copyright (c) 2026 Artem Matyukhin
+
 RISCV_PREFIX ?= riscv64-unknown-elf-
 CC      = $(RISCV_PREFIX)gcc
 OBJCOPY = $(RISCV_PREFIX)objcopy

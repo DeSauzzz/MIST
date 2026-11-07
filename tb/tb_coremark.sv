@@ -1,3 +1,6 @@
+// SPDX-License-Identifier: MIT
+// Copyright (c) 2026 Artem Matyukhin
+
 module tb_coremark;
   localparam logic [31:0] LOG_ADDR = 32'h0002_0000;
   localparam logic [31:0] END_ADDR = 32'h0002_0004;

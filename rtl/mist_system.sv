@@ -1,3 +1,6 @@
+// SPDX-License-Identifier: MIT
+// Copyright (c) 2026 Artem Matyukhin
+
 module mist_system #(
   parameter INIT_IMEM = "instr.mem",
   parameter INIT_DMEM = "data.mem"

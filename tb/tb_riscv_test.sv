@@ -1,3 +1,6 @@
+// SPDX-License-Identifier: MIT
+// Copyright (c) 2026 Artem Matyukhin
+
 module tb_riscv_tests;
   localparam logic [31:0] RESULT_ADDR = 32'h0002_0008;
 

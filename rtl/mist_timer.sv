@@ -1,3 +1,6 @@
+// SPDX-License-Identifier: MIT
+// Copyright (c) 2026 Artem Matyukhin
+
 module mist_timer(
   input  logic        clk_i,
   input  logic        rstn_i,

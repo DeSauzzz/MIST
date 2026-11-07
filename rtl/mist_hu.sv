@@ -1,17 +1,5 @@
-// Operand A selector
-import mist_alu_pkg::OP_A_RS1;
-import mist_alu_pkg::OP_A_CURR_PC;
-import mist_alu_pkg::OP_A_ZERO;
-
-// Operand B selector
-import mist_alu_pkg::OP_B_RS2;
-import mist_alu_pkg::OP_B_INCR;
-import mist_alu_pkg::OP_B_IMM_I;
-import mist_alu_pkg::OP_B_IMM_U;
-import mist_alu_pkg::OP_B_IMM_S;
-
-// Opcode check
-import mist_decoder_pkg::*;
+// SPDX-License-Identifier: MIT
+// Copyright (c) 2026 Artem Matyukhin
 
 module mist_hu(
   input  logic        clk_i,

@@ -1,3 +1,6 @@
+// SPDX-License-Identifier: MIT
+// Copyright (c) 2026 Artem Matyukhin
+
 import mist_decoder_pkg::*;
 import mist_alu_pkg::*;
 import mist_csr_pkg::*;

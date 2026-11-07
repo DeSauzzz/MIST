@@ -1,3 +1,6 @@
+// SPDX-License-Identifier: MIT
+// Copyright (c) 2026 Artem Matyukhin
+
 package mist_csr_pkg;
 
   localparam CSR_RW        = 3'b001;  // Read/Write CSR

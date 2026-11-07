@@ -1,3 +1,6 @@
+/* SPDX-License-Identifier: MIT
+   Copyright (c) 2026 Artem Matyukhin */
+
 #ifndef MIST_RISCV_TEST_H
 #define MIST_RISCV_TEST_H
 

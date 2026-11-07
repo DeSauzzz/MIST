@@ -1,3 +1,6 @@
+/* SPDX-License-Identifier: MIT
+   Copyright (c) 2026 Artem Matyukhin */
+
 .section    .boot, "ax"
 
   .global _start
